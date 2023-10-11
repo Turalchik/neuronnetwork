@@ -2,9 +2,9 @@
 
 template<typename T>
 Matrix<T>::Matrix(const size_t rows, const size_t columns) : rows_(rows), columns_(columns) {
-	matrix_ = new Rational * [rows_];
+	matrix_ = new T * [rows_];
 	for (size_t i = 0; i < rows_; ++i) {
-		matrix_[i] = new Rational[columns_];
+		matrix_[i] = new T[columns_];
 	}
 }
 
@@ -57,9 +57,9 @@ Matrix<T>& Matrix<T>::operator= (Matrix&& other) noexcept {
 
 template<typename T>
 Matrix<T> zeros(const size_t rows, const size_t columns) {
-	Matrix tempObj(rowsNumber, columnNumber);
-	for (size_t i = 0; i < rowsNumber; ++i) {
-		for (size_t j = 0; j < columnNumber; ++j) {
+	Matrix tempObj(rows, columns);
+	for (size_t i = 0; i < rows; ++i) {
+		for (size_t j = 0; j < columns; ++j) {
 			tempObj(i, j) = 0;
 		}
 	}
@@ -125,7 +125,7 @@ Matrix<T>& Matrix<T>::operator-= (const Matrix& other) {
 template<typename T>
 Matrix<T>& Matrix<T>::operator*= (const Matrix& other) {
 	if (columns_ == other.rows_) {
-		Rational result;
+		T result;
 		Matrix tempObj(rows_, other.columns_);
 		for (size_t i = 0; i < rows_; ++i) {
 			for (size_t j = 0; j < other.columns_; ++j) {
@@ -237,7 +237,7 @@ Matrix<T> invMatrix(const Matrix<T>& X) {
 	if (X.rows() == X.columns()) {
 		Matrix eyeMatrix = eye(X.rows());
 		Matrix tempObj(X);
-		Rational tempValue;
+		T tempValue;
 		size_t rowIndex;
 
 		for (size_t diagonalIndex = 0; diagonalIndex < tempObj.rows(); ++diagonalIndex) {
@@ -293,7 +293,7 @@ Matrix<T> det(const Matrix<T>& X) {
 
 	if (X.rows() == X.columns()) {
 		Matrix tempObj(X);
-		Rational tempValue;
+		T tempValue;
 		size_t rowIndex;
 		bool detSign = false;
 
@@ -326,7 +326,7 @@ Matrix<T> det(const Matrix<T>& X) {
 			tempValue *= tempObj(diagonalIndex, diagonalIndex);
 		}
 
-		return (detSign ? Matrix(-tempValue) : Matrix(tempValue));
+		return (detSign ? Matrix<T>(-tempValue) : Matrix<T>(tempValue));
 	}
 	throw "Determinant of non-square matrix can't be calculated.";
 }
