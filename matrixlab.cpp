@@ -1,20 +1,20 @@
 #include "matrixlab.h"
 
-template<typename T>
-Matrix<T>::Matrix(const size_t rows, const size_t columns) : rows_(rows), columns_(columns) {
-	matrix_ = new T * [rows_];
+
+Matrix::Matrix(const size_t rows, const size_t columns) : rows_(rows), columns_(columns) {
+	matrix_ = new double * [rows_];
 	for (size_t i = 0; i < rows_; ++i) {
-		matrix_[i] = new T[columns_];
+		matrix_[i] = new double[columns_];
 	}
 }
 
-template<typename T>
-Matrix<T>::Matrix(const T& X) {
+
+Matrix::Matrix(const double X) : rows_(0), columns_(0) {
 	matrix_[0][0] = X;
 }
 
-template<typename T>
-Matrix<T>::Matrix(const Matrix& other) : Matrix(other.rows_, other.columns_) {
+
+Matrix::Matrix(const Matrix& other) : Matrix(other.rows_, other.columns_) {
 	for (size_t i = 0; i < other.rows_; ++i) {
 		for (size_t j = 0; j < other.columns_; ++j) {
 			matrix_[i][j] = other.matrix_[i][j];
@@ -22,24 +22,24 @@ Matrix<T>::Matrix(const Matrix& other) : Matrix(other.rows_, other.columns_) {
 	}
 }
 
-template<typename T>
-Matrix<T>::Matrix(Matrix&& other) noexcept {
+
+Matrix::Matrix(Matrix&& other) noexcept {
 	matrix_ = nullptr;
 	rows_ = 0;
 	columns_ = 0;
 	swap(other);
 }
 
-template<typename T>
-Matrix<T>::~Matrix() {
+
+Matrix::~Matrix() {
 	for (size_t i = 0; i < rows_; ++i) {
 		delete[] matrix_[i];
 	}
 	delete[] matrix_;
 }
 
-template<typename T>
-Matrix<T>& Matrix<T>::operator= (const Matrix& other) {
+
+Matrix& Matrix::operator= (const Matrix& other) {
 	if (this != &other) {
 		Matrix tempObj(other);
 		swap(tempObj);
@@ -47,16 +47,16 @@ Matrix<T>& Matrix<T>::operator= (const Matrix& other) {
 	return *this;
 }
 
-template<typename T>
-Matrix<T>& Matrix<T>::operator= (Matrix&& other) noexcept {
+
+Matrix& Matrix::operator= (Matrix&& other) noexcept {
 	if (this != &other) {
 		swap(other);
 	}
 	return *this;
 }
 
-template<typename T>
-Matrix<T> zeros(const size_t rows, const size_t columns) {
+
+Matrix zeros(const size_t rows, const size_t columns) {
 	Matrix tempObj(rows, columns);
 	for (size_t i = 0; i < rows; ++i) {
 		for (size_t j = 0; j < columns; ++j) {
@@ -66,8 +66,8 @@ Matrix<T> zeros(const size_t rows, const size_t columns) {
 	return tempObj;
 }
 
-template<typename T>
-Matrix<T> eye(const size_t n) {
+
+Matrix eye(const size_t n) {
 	Matrix tempObj(n, n);
 	for (size_t i = 0; i < n; ++i) {
 		for (size_t j = 0; j < n; ++j) {
@@ -77,35 +77,35 @@ Matrix<T> eye(const size_t n) {
 	return tempObj;
 }
 
-template<typename T>
-size_t Matrix<T>::rows() const {
+
+size_t Matrix::rows() const {
 	return rows_;
 }
 
-template<typename T>
-size_t Matrix<T>::columns() const {
+
+size_t Matrix::columns() const {
 	return columns_;
 }
 
-template<typename T>
-size_t Matrix<T>::size() const {
+
+size_t Matrix::size() const {
 	return rows_ * columns_;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator- () const {
+
+Matrix Matrix::operator- () const {
 	Matrix tempObj(*this);
 	tempObj *= (-1);
 	return tempObj;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator+ () const {
+
+Matrix Matrix::operator+ () const {
 	return *this;
 }
 
-template<typename T>
-Matrix<T>& Matrix<T>::operator+= (const Matrix& other) {
+
+Matrix& Matrix::operator+= (const Matrix& other) {
 	if (rows_ == other.rows_ && columns_ == other.columns_) {
 		for (size_t i = 0; i < rows_; ++i) {
 			for (size_t j = 0; j < columns_; ++j) {
@@ -117,15 +117,15 @@ Matrix<T>& Matrix<T>::operator+= (const Matrix& other) {
 	throw "Matrices of different sizes cannot be added.";
 }
 
-template<typename T>
-Matrix<T>& Matrix<T>::operator-= (const Matrix& other) {
+
+Matrix& Matrix::operator-= (const Matrix& other) {
 	return *this += (-other);
 }
 
-template<typename T>
-Matrix<T>& Matrix<T>::operator*= (const Matrix& other) {
+
+Matrix& Matrix::operator*= (const Matrix& other) {
 	if (columns_ == other.rows_) {
-		T result;
+		double result;
 		Matrix tempObj(rows_, other.columns_);
 		for (size_t i = 0; i < rows_; ++i) {
 			for (size_t j = 0; j < other.columns_; ++j) {
@@ -162,63 +162,63 @@ Matrix<T>& Matrix<T>::operator*= (const Matrix& other) {
 
 }
 
-template<typename T>
-Matrix<T>& Matrix<T>::operator/= (const Matrix& other) {
+
+Matrix& Matrix::operator/= (const Matrix& other) {
 	*this *= invMatrix(other);
 	return *this;
 }
 
-template<typename T>
-T& Matrix<T>::operator() (size_t i, size_t j) {
+
+double& Matrix::operator() (size_t i, size_t j) {
 	if (i < rows_ && j < columns_) {
 		return matrix_[i][j];
 	}
 	throw "Out of bounds.";
 }
 
-template<typename T>
-T*& Matrix<T>::operator() (size_t i) const {
+
+double*& Matrix::operator() (size_t i) const {
 	return matrix_[i];
 }
 
-template<typename T>
-const T& Matrix<T>::operator() (size_t i, size_t j) const {
+
+const double& Matrix::operator() (size_t i, size_t j) const {
 	if (i < rows_ && j < columns_) {
 		return matrix_[i][j];
 	}
 	throw "Out of bounds.";
 }
 
-template<typename T>
-Matrix<T> operator+ (const Matrix<T>& X, const Matrix<T>& Y) {
+
+Matrix operator+ (const Matrix& X, const Matrix& Y) {
 	Matrix tempObj(X);
 	tempObj += Y;
 	return tempObj;
 }
 
-template<typename T>
-Matrix<T> operator- (const Matrix<T>& X, const Matrix<T>& Y) {
+
+Matrix operator- (const Matrix& X, const Matrix& Y) {
 	Matrix tempObj(X);
 	tempObj -= Y;
 	return tempObj;
 }
 
-template<typename T>
-Matrix<T> operator* (const Matrix<T>& X, const Matrix<T>& Y) {
+
+Matrix operator* (const Matrix& X, const Matrix& Y) {
 	Matrix tempObj(X);
 	tempObj *= Y;
 	return tempObj;
 }
 
-template<typename T>
-Matrix<T> operator/ (const Matrix<T>& X, const Matrix<T>& Y) {
+
+Matrix operator/ (const Matrix& X, const Matrix& Y) {
 	Matrix tempObj(X);
 	tempObj /= Y;
 	return tempObj;
 }
 
-template<typename T>
-Matrix<T> transpose(const Matrix<T>& X) {
+
+Matrix transpose(const Matrix& X) {
 	size_t rows = X.rows();
 	size_t columns = X.columns();
 
@@ -231,13 +231,13 @@ Matrix<T> transpose(const Matrix<T>& X) {
 	return tempObj;
 }
 
-template<typename T>
-Matrix<T> invMatrix(const Matrix<T>& X) {
+
+Matrix invMatrix(const Matrix& X) {
 
 	if (X.rows() == X.columns()) {
 		Matrix eyeMatrix = eye(X.rows());
 		Matrix tempObj(X);
-		T tempValue;
+		double tempValue;
 		size_t rowIndex;
 
 		for (size_t diagonalIndex = 0; diagonalIndex < tempObj.rows(); ++diagonalIndex) {
@@ -288,12 +288,12 @@ Matrix<T> invMatrix(const Matrix<T>& X) {
 	throw "Inverse matrix can not be calculated.";
 }
 
-template<typename T>
-Matrix<T> det(const Matrix<T>& X) {
+
+Matrix det(const Matrix& X) {
 
 	if (X.rows() == X.columns()) {
 		Matrix tempObj(X);
-		T tempValue;
+		double tempValue;
 		size_t rowIndex;
 		bool detSign = false;
 
@@ -326,13 +326,13 @@ Matrix<T> det(const Matrix<T>& X) {
 			tempValue *= tempObj(diagonalIndex, diagonalIndex);
 		}
 
-		return (detSign ? Matrix<T>(-tempValue) : Matrix<T>(tempValue));
+		return (detSign ? Matrix(-tempValue) : Matrix(tempValue));
 	}
 	throw "Determinant of non-square matrix can't be calculated.";
 }
 
-template<typename T>
-Matrix<T> elementWiseMultiplication(const Matrix<T>& X, const Matrix<T>& Y) {
+
+Matrix elementWiseMultiplication(const Matrix& X, const Matrix& Y) {
 	if (X.rows() == Y.rows() && X.columns() == Y.columns()) {
 		size_t rows = X.rows();
 		size_t columns = X.columns();
@@ -349,8 +349,8 @@ Matrix<T> elementWiseMultiplication(const Matrix<T>& X, const Matrix<T>& Y) {
 	throw "Element-wise multiplication is not possible.";
 }
 
-template<typename T>
-Matrix<T> elementWiseDivision(const Matrix<T>& X, const Matrix<T>& Y) {
+
+Matrix elementWiseDivision(const Matrix& X, const Matrix& Y) {
 	if (X.rows() == Y.rows() && X.columns() == Y.columns()) {
 		size_t rows = X.rows();
 		size_t columns = X.columns();
@@ -367,8 +367,8 @@ Matrix<T> elementWiseDivision(const Matrix<T>& X, const Matrix<T>& Y) {
 	throw "Element-wise division is not possible.";
 }
 
-template<typename T>
-bool operator== (const Matrix<T>& X, const Matrix<T>& Y) {
+
+bool operator== (const Matrix& X, const Matrix& Y) {
 	if (X.rows() == Y.rows() && X.columns() == Y.columns()) {
 		size_t rows = X.rows();
 		size_t columns = X.columns();
@@ -384,7 +384,7 @@ bool operator== (const Matrix<T>& X, const Matrix<T>& Y) {
 	return false;
 }
 
-template<typename T>
-bool operator!= (const Matrix<T>& X, const Matrix<T>& Y) {
+
+bool operator!= (const Matrix& X, const Matrix& Y) {
 	return !(X == Y);
 }
