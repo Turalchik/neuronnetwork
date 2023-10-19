@@ -2,13 +2,12 @@
 #define MATRIXFORMATRIXEXP
 
 #include<fstream>
-#include "rational.h"
 
-template<typename T>
+
 class Matrix {
 	size_t rows_;
 	size_t columns_;
-	T** matrix_;
+	double** matrix_;
 
 	void swap(Matrix& other) {
 		std::swap(rows_, other.rows_);
@@ -18,7 +17,7 @@ class Matrix {
 
 public:
 	Matrix(const size_t rows, const size_t columns);
-	Matrix(const T& X);
+	Matrix(const double X);
 	Matrix(const Matrix& other);
 	Matrix(Matrix&& other) noexcept;
 	~Matrix();
@@ -37,49 +36,23 @@ public:
 	Matrix& operator*= (const Matrix& other);
 	Matrix& operator/= (const Matrix& other);
 
-	T& operator() (size_t i, size_t j);
-	T*& operator() (size_t i) const;
-	const T& operator() (size_t i, size_t j) const;
+	double& operator() (size_t i, size_t j);
+	double*& operator() (size_t i) const;
+	const double& operator() (size_t i, size_t j) const;
 };
 
-template<typename T>
-Matrix<T> operator+ (const Matrix<T>& X, const Matrix<T>& Y);
-
-template<typename T>
-Matrix<T> operator- (const Matrix<T>& X, const Matrix<T>& Y);
-
-template<typename T>
-Matrix<T> operator* (const Matrix<T>& X, const Matrix<T>& Y);
-
-template<typename T>
-Matrix<T> operator/ (const Matrix<T>& X, const Matrix<T>& Y);
-
-template<typename T>
-Matrix<T> transpose(const Matrix<T>& X);
-
-template<typename T>
-Matrix<T> invMatrix(const Matrix<T>& X);
-
-template<typename T>
-Matrix<T> det(const Matrix<T>& X);
-
-template<typename T>
-Matrix<T> zeros(const Matrix<T>& rows, const Matrix<T>& columns);
-
-template<typename T>
-Matrix<T> eye(const Matrix<T>& n);
-
-template<typename T>
-Matrix<T> elementWiseMultiplication(const Matrix<T>& X, const Matrix<T>& Y);
-
-template<typename T>
-Matrix<T> elementWiseDivision(const Matrix<T>& X, const Matrix<T>& Y);
-
-template<typename T>
-bool operator== (const Matrix<T>& x, const Matrix<T>& y);
-
-template<typename T>
-bool operator!= (const Matrix<T>& x, const Matrix<T>& y);
-
+Matrix operator+ (const Matrix& X, const Matrix& Y);
+Matrix operator- (const Matrix& X, const Matrix& Y);
+Matrix operator* (const Matrix& X, const Matrix& Y);
+Matrix operator/ (const Matrix& X, const Matrix& Y);
+Matrix transpose(const Matrix& X);
+Matrix invMatrix(const Matrix& X);
+Matrix det(const Matrix& X);
+Matrix zeros(const Matrix& rows, const Matrix& columns);
+Matrix eye(const Matrix& n);
+Matrix elementWiseMultiplication(const Matrix& X, const Matrix& Y);
+Matrix elementWiseDivision(const Matrix& X, const Matrix& Y);
+bool operator== (const Matrix& x, const Matrix& y);
+bool operator!= (const Matrix& x, const Matrix& y);
 
 #endif
