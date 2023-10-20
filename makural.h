@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "layer.h"
+#include"costfunctions.h"
 
 class NeuralNetwork {
 	std::vector<Layer*> layers_;
@@ -13,11 +14,12 @@ public:
 	const CostFunction* getCostFunction() const {
 		return cost_func_;
 	}
-	NeuralNetwork(const std::vector<int>&, ActivationFunction*, ActivationFunction*);
+	NeuralNetwork(const std::vector<int>&, ActivationFunction*, ActivationFunction*, CostFunction*);
+	void StochasticAverageGradient(const std::vector<Matrix*>& butch, const std::vector<Matrix*>& answers, double eps, double forgetting_speed, double convergence_step);
 	const Matrix& calculateOutputs(const Matrix&);
-	Matrix calculateAnswer(const Matrix& input) const;
-	void applyBackpropagationAlgorithm();
-	void changeWeights();
+	Matrix calculateAnswer(const Matrix& input);
+	void applyBackpropagationAlgorithm(const Matrix& actualOutputs);
+	void changeWeights(const Matrix& convergence_step);
 	~NeuralNetwork();
 };
 
