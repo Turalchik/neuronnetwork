@@ -2,7 +2,6 @@
 #define ACTIVATIONFUNCTIONS
 
 #include"matrixlab.h"
-#include<cmath>
 
 
 class ActivationFunction {
