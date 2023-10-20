@@ -15,23 +15,24 @@ protected:
 	Matrix gradient_nodes_biases_;
 public:
 	Layer(int, int);
-	virtual const Matrix& calculateOutput(const Matrix&, const ActivationFunction* = nullptr) = 0;
-	const Matrix& getBeforeActivation() const {
-		return before_activation_;
-	}
+	virtual const Matrix& calculateOutput(const Matrix&, const ActivationFunction*) = 0;
+	const Matrix& getBeforeActivation() const;
+	const Matrix& getAfterActivation() const;
+	const Matrix& getWeighs() const;
+	void putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases);
+	void setWeightsAndBiases(const Matrix& convergence_step);
 };
 
 class Input : public Layer {
 public:
 	Input(int input_size, int output_size) : Layer(input_size, output_size){}
-	const Matrix& calculateOutput(const Matrix&, const ActivationFunction* = nullptr);
+	const Matrix& calculateOutput(const Matrix&, const ActivationFunction*);
 };
 
 class Dense : public Layer {
 public:
 	Dense(int input_size, int output_size) : Layer(input_size, output_size){}
-	const Matrix& calculateOutput(const Matrix&, const ActivationFunction* = nullptr);
+	const Matrix& calculateOutput(const Matrix&, const ActivationFunction*);
 };
-
 
 #endif

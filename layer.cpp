@@ -22,5 +22,28 @@ const Matrix& Dense::calculateOutput(const Matrix& input_data, const ActivationF
 
 const Matrix& Input::calculateOutput(const Matrix& input, const ActivationFunction* activationFunc) {
 	before_activation_ = (input * weights_) + biases_;
+	after_activation_ = input;
 	return before_activation_;
+}
+
+const Matrix& Layer::getBeforeActivation() const {
+	return before_activation_;
+}
+
+const Matrix& Layer::getAfterActivation() const {
+	return after_activation_;
+}
+
+const Matrix& Layer::getWeighs() const {
+	return weights_;
+}
+
+void Layer::putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases) {
+	gradient_nodes_weights_ = weights;
+	gradient_nodes_biases_ = biases;
+}
+
+void Layer::setWeightsAndBiases(const Matrix& convergence_step) {
+	weights_ -= convergence_step * gradient_nodes_weights_;
+	biases_ -= convergence_step * gradient_nodes_biases_;
 }

@@ -26,7 +26,7 @@ Matrix Sigmoid::calculateDerivativeFunction(const Matrix& WeightedSums) const {
 	return tempMatrix;
 }
 
-Matrix ReLu::calculateFunction(const Matrix& WeightedSums) const  {
+Matrix ReLu::calculateFunction(const Matrix& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
@@ -39,7 +39,7 @@ Matrix ReLu::calculateFunction(const Matrix& WeightedSums) const  {
 	return newMatrix;
 }
 
-Matrix ReLu::calculateDerivativeFunction(const Matrix& WeightedSums) const  {
+Matrix ReLu::calculateDerivativeFunction(const Matrix& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
