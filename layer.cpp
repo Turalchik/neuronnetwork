@@ -1,25 +1,26 @@
 #include "layer.h"
 
 Layer::Layer(int input_size, int output_size) :
-	afterActivation_(input_size, 1),
-	beforeActivation_(output_size, 1),
+	after_activation_(1, input_size),
+	before_activation_(1, output_size),
 	weights_(input_size, output_size),
-	biases_(output_size, 1),
-	gradientNodesWeights_(input_size, output_size),
-	gradientNodesBiases_(output_size, 1) {}
+	biases_(1, output_size),
+	gradient_nodes_weights_(input_size, output_size),
+	gradient_nodes_biases_(1, output_size) {}
 
 
-const Matrix& Layer::calculateOutput(const Matrix& input_data) {
-	if (input_data.columns() != 1 || input_data.rows() != afterActivation_.rows()) {
+const Matrix& Dense::calculateOutput(const Matrix& input_data, const ActivationFunction* activationFunc) {
+	if (input_data.columns() != 1 || input_data.rows() != after_activation_.rows()) {
 		throw "Error in calculateOutput";
 	}
 
-	afterActivation_ = calculateFunction(input_data);
-	for (int output = 0; output < beforeActivation_.rows(); ++output) {
-		for (int input = 0; input < afterActivation_.rows(); ++input) {
-			beforeActivation_(output, 0) += weights_(input, output) * afterActivation_(input, 0);
-		}
-	}
+	after_activation_ = activationFunc->calculateFunction(input_data);
+	before_activation_ = (after_activation_ * weights_) + biases_;
 
-	return beforeActivation_;
+	return before_activation_;
+}
+
+const Matrix& Input::calculateOutput(const Matrix& input, const ActivationFunction* activationFunc) {
+	before_activation_ = (input * weights_) + biases_;
+	return before_activation_;
 }
