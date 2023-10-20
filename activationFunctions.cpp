@@ -7,7 +7,7 @@ Matrix Sigmoid::calculateFunction(const Matrix& WeightedSums) const {
 
 	Matrix newMatrix(WeightedSums.rows(), 1);
 	for (size_t i = 0; i < WeightedSums.rows(); ++i) {
-		newMatrix(i, 0) = 1.0 / (1.0 + exp(-WeightedSums(i, 0)));
+		newMatrix(i, 0) = 1.0 / (1.0 + std::exp(-WeightedSums(i, 0)));
 	}
 
 	return newMatrix;
@@ -60,8 +60,8 @@ Matrix Tanh::calculateFunction(const Matrix& WeightedSums) const {
 
 	Matrix newMatrix(1, WeightedSums.columns());
 	for (size_t i = 0; i < WeightedSums.rows(); ++i) {
-		newMatrix(0, i) = (exp(WeightedSums(0, i)) - exp(-WeightedSums(0, i))) /
-			(exp(WeightedSums(0, i)) + exp(-WeightedSums(0, i)));
+		newMatrix(0, i) = (std::exp(WeightedSums(0, i)) - std::exp(-WeightedSums(0, i))) /
+			(std::exp(WeightedSums(0, i)) + std::exp(-WeightedSums(0, i)));
 	}
 
 	return newMatrix;
@@ -86,7 +86,7 @@ Matrix ELU::calculateFunction(const Matrix& WeightedSums) const {
 
 	Matrix tempMatrix(1, WeightedSums.columns());
 	for (size_t i = 0; i < WeightedSums.columns(); ++i) {
-		tempMatrix(0, i) = (WeightedSums(0, i) > 0.0) ? WeightedSums(0, i) : alpha_ * (exp(WeightedSums(0, i) - 1.0));
+		tempMatrix(0, i) = (WeightedSums(0, i) > 0.0) ? WeightedSums(0, i) : alpha_ * (std::exp(WeightedSums(0, i) - 1.0));
 	}
 
 	return tempMatrix;
@@ -99,7 +99,7 @@ Matrix ELU::calculateDerivativeFunction(const Matrix& WeightedSums) const {
 
 	Matrix tempMatrix(1, WeightedSums.columns());
 	for (size_t i = 0; i < WeightedSums.columns(); ++i) {
-		tempMatrix(0, i) = (WeightedSums(0, i) > 0.0) ? 1.0 : alpha_ * (exp(WeightedSums(0, i)));
+		tempMatrix(0, i) = (WeightedSums(0, i) > 0.0) ? 1.0 : alpha_ * (std::exp(WeightedSums(0, i)));
 	}
 
 	return tempMatrix;
@@ -115,7 +115,7 @@ Matrix Softmax::calculateFunction(const Matrix& WeightedSums) const {
 	Matrix tempMatrix(1, WeightedSums.columns());
 
 	for (size_t i = 0; i < WeightedSums.columns(); ++i) {
-		ExponentedElement = exp(WeightedSums(0, i));
+		ExponentedElement = std::exp(WeightedSums(0, i));
 		tempMatrix(0, i) = ExponentedElement;
 		LowerSum += ExponentedElement;
 	}
