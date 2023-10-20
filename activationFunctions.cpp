@@ -79,8 +79,6 @@ Matrix Tanh::calculateDerivativeFunction(const Matrix& WeightedSums) const {
 	return tempMatrix;
 }
 
-ELU::ELU(double alpha) : ActivationFunction(alpha) {}
-
 Matrix ELU::calculateFunction(const Matrix& WeightedSums) const {
 	if (WeightedSums.columns() != 1) {
 		throw "Wrong WeightedSums vector size.";

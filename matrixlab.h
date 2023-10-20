@@ -16,8 +16,8 @@ class Matrix {
 	}
 
 public:
-	Matrix(const size_t rows, const size_t columns);
-	Matrix(const double X);
+	Matrix(const size_t& rows, const size_t& columns);
+	Matrix(const double& X);
 	Matrix(const Matrix& other);
 	Matrix(Matrix&& other) noexcept;
 	~Matrix();
@@ -36,9 +36,12 @@ public:
 	Matrix& operator*= (const Matrix& other);
 	Matrix& operator/= (const Matrix& other);
 
-	double& operator() (size_t i, size_t j);
-	double*& operator() (size_t i) const;
-	const double& operator() (size_t i, size_t j) const;
+	double& operator() (const size_t& i, const size_t& j);
+	double*& operator() (const size_t& i) const;
+	const double& operator() (const size_t& i, const size_t& j) const;
+
+	Matrix& elementWiseMultiplication(const Matrix& other);
+	Matrix& elementWiseDivision(const Matrix& other);
 };
 
 Matrix operator+ (const Matrix& X, const Matrix& Y);
@@ -48,8 +51,9 @@ Matrix operator/ (const Matrix& X, const Matrix& Y);
 Matrix transpose(const Matrix& X);
 Matrix invMatrix(const Matrix& X);
 Matrix det(const Matrix& X);
-Matrix zeros(const Matrix& rows, const Matrix& columns);
-Matrix eye(const Matrix& n);
+Matrix zeros(const size_t& rows, const size_t& columns);
+Matrix eye(const size_t& n);
+Matrix ones(const size_t& rows, const size_t& columns);
 Matrix elementWiseMultiplication(const Matrix& X, const Matrix& Y);
 Matrix elementWiseDivision(const Matrix& X, const Matrix& Y);
 bool operator== (const Matrix& x, const Matrix& y);

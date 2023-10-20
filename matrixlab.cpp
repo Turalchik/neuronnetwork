@@ -1,7 +1,7 @@
 #include "matrixlab.h"
 
 
-Matrix::Matrix(const size_t rows, const size_t columns) : rows_(rows), columns_(columns) {
+Matrix::Matrix(const size_t& rows, const size_t& columns) : rows_(rows), columns_(columns) {
 	matrix_ = new double * [rows_];
 	for (size_t i = 0; i < rows_; ++i) {
 		matrix_[i] = new double[columns_];
@@ -9,7 +9,7 @@ Matrix::Matrix(const size_t rows, const size_t columns) : rows_(rows), columns_(
 }
 
 
-Matrix::Matrix(const double X) : rows_(0), columns_(0) {
+Matrix::Matrix(const double& X) : rows_(0), columns_(0) {
 	matrix_[0][0] = X;
 }
 
@@ -56,7 +56,7 @@ Matrix& Matrix::operator= (Matrix&& other) noexcept {
 }
 
 
-Matrix zeros(const size_t rows, const size_t columns) {
+Matrix zeros(const size_t& rows, const size_t& columns) {
 	Matrix tempObj(rows, columns);
 	for (size_t i = 0; i < rows; ++i) {
 		for (size_t j = 0; j < columns; ++j) {
@@ -66,8 +66,18 @@ Matrix zeros(const size_t rows, const size_t columns) {
 	return tempObj;
 }
 
+Matrix ones(const size_t& rows, const size_t& columns) {
+	Matrix tempObj(rows, columns);
+	for (size_t i = 0; i < rows; ++i) {
+		for (size_t j = 0; j < columns; ++j) {
+			tempObj(i, j) = 1;
+		}
+	}
+	return tempObj;
+}
 
-Matrix eye(const size_t n) {
+
+Matrix eye(const size_t& n) {
 	Matrix tempObj(n, n);
 	for (size_t i = 0; i < n; ++i) {
 		for (size_t j = 0; j < n; ++j) {
@@ -169,7 +179,7 @@ Matrix& Matrix::operator/= (const Matrix& other) {
 }
 
 
-double& Matrix::operator() (size_t i, size_t j) {
+double& Matrix::operator() (const size_t& i, const size_t& j) {
 	if (i < rows_ && j < columns_) {
 		return matrix_[i][j];
 	}
@@ -177,17 +187,44 @@ double& Matrix::operator() (size_t i, size_t j) {
 }
 
 
-double*& Matrix::operator() (size_t i) const {
+double*& Matrix::operator() (const size_t& i) const {
 	return matrix_[i];
 }
 
 
-const double& Matrix::operator() (size_t i, size_t j) const {
+const double& Matrix::operator() (const size_t& i, const size_t& j) const {
 	if (i < rows_ && j < columns_) {
 		return matrix_[i][j];
 	}
 	throw "Out of bounds.";
 }
+
+Matrix& Matrix::elementWiseMultiplication(const Matrix& other) {
+	if (rows_ == other.rows_ && columns_ == other.columns_) {
+		for (size_t i = 0; i < rows_; ++i) {
+			for (size_t j = 0; j < columns_; ++j) {
+				matrix_[i][j] *= other.matrix_[i][j];
+			}
+		}
+
+		return *this;
+	}
+	throw "Element-wise multiplication is not possible.";
+}
+
+Matrix& Matrix::elementWiseDivision(const Matrix& other) {
+	if (rows_ == other.rows_ && columns_ == other.columns_) {
+		for (size_t i = 0; i < rows_; ++i) {
+			for (size_t j = 0; j < columns_; ++j) {
+				matrix_[i][j] /= other.matrix_[i][j];
+			}
+		}
+
+		return *this;
+	}
+	throw "Element-wise multiplication is not possible.";
+}
+
 
 
 Matrix operator+ (const Matrix& X, const Matrix& Y) {
@@ -333,38 +370,15 @@ Matrix det(const Matrix& X) {
 
 
 Matrix elementWiseMultiplication(const Matrix& X, const Matrix& Y) {
-	if (X.rows() == Y.rows() && X.columns() == Y.columns()) {
-		size_t rows = X.rows();
-		size_t columns = X.columns();
-		Matrix tempObj(rows, columns);
-
-		for (size_t i = 0; i < rows; ++i) {
-			for (size_t j = 0; j < columns; ++j) {
-				tempObj(i, j) = X(i, j) * Y(i, j);
-			}
-		}
-
-		return tempObj;
-	}
-	throw "Element-wise multiplication is not possible.";
+	Matrix tempObj(X);
+	tempObj.elementWiseMultiplication(Y);
+	return tempObj;
 }
 
-
 Matrix elementWiseDivision(const Matrix& X, const Matrix& Y) {
-	if (X.rows() == Y.rows() && X.columns() == Y.columns()) {
-		size_t rows = X.rows();
-		size_t columns = X.columns();
-		Matrix tempObj(rows, columns);
-
-		for (size_t i = 0; i < rows; ++i) {
-			for (size_t j = 0; j < columns; ++j) {
-				tempObj(i, j) = X(i, j) / Y(i, j);
-			}
-		}
-
-		return tempObj;
-	}
-	throw "Element-wise division is not possible.";
+	Matrix tempObj(X);
+	tempObj.elementWiseDivision(Y);
+	return tempObj;
 }
 
 
