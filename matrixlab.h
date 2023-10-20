@@ -28,6 +28,8 @@ public:
 	size_t columns() const;
 	size_t size() const;
 
+	void free();
+
 	Matrix operator- () const;
 	Matrix operator+ () const;
 

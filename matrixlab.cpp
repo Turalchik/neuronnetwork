@@ -32,10 +32,7 @@ Matrix::Matrix(Matrix&& other) noexcept {
 
 
 Matrix::~Matrix() {
-	for (size_t i = 0; i < rows_; ++i) {
-		delete[] matrix_[i];
-	}
-	delete[] matrix_;
+	free();
 }
 
 
@@ -102,6 +99,12 @@ size_t Matrix::size() const {
 	return rows_ * columns_;
 }
 
+void Matrix::free() {
+	for (size_t i = 0; i < rows_; ++i) {
+		delete[] matrix_[i];
+	}
+	delete[] matrix_;
+}
 
 Matrix Matrix::operator- () const {
 	Matrix tempObj(*this);
@@ -219,7 +222,7 @@ Matrix& Matrix::elementWiseDivision(const Matrix& other) {
 				matrix_[i][j] /= other.matrix_[i][j];
 			}
 		}
-
+		
 		return *this;
 	}
 	throw "Element-wise multiplication is not possible.";
