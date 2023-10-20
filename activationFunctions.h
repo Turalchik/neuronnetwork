@@ -3,23 +3,23 @@
 
 #include"matrixlab.h"
 #include<cmath>
+#include<vector>
 
 
 class ActivationFunction {
 protected:
 	double alpha_;
 public:
-	ActivationFunction(double alpha) : alpha_(alpha) {}
-	virtual Matrix calculateFunction(const Matrix& WeightedSums) = 0;
-	virtual Matrix calculateDerivativeFunction(const Matrix& WeightedSums) = 0;
+	ActivationFunction(double alpha = 0) : alpha_(alpha) {}
+	virtual Matrix calculateFunction(const Matrix& WeightedSums) const = 0;
+	virtual Matrix calculateDerivativeFunction(const Matrix& WeightedSums) const = 0;
 };
 
 
 
 class Sigmoid : public ActivationFunction {
 public:
-	Sigmoid(double alpha = 0) : ActivationFunction(alpha) {}
-	Matrix calculateFunction(const Matrix& WeightedSums) override {
+	Matrix calculateFunction(const Matrix& WeightedSums) const override {
 		if (WeightedSums.columns() != 1) {
 			throw "Wrong WeightedSums vector size.";
 		}
@@ -32,14 +32,23 @@ public:
 		return newMatrix;
 	}
 
-	Matrix calculateDerivativeFunction(const Matrix& WeightedSums) override {
-		return calculateFunction(WeightedSums) * (1 - calculateFunction(WeightedSums));
+	Matrix calculateDerivativeFunction(const Matrix& WeightedSums) const override {
+		if (WeightedSums.columns() != 1) {
+			throw "Wrong WeightedSums vector size.";
+		}
+
+		Matrix ActivatedWeightedSums = calculateFunction(WeightedSums);
+		Matrix tempMatrix = ones(WeightedSums.rows(), 1);
+		tempMatrix -= ActivatedWeightedSums;
+		tempMatrix.elementWiseMultiplication(ActivatedWeightedSums);
+
+		return tempMatrix;
 	}
 };
 
 class ReLu : public ActivationFunction {
 public:
-	Matrix calculateFunction(const Matrix& WeightedSums) override {
+	Matrix calculateFunction(const Matrix& WeightedSums) const override {
 		if (WeightedSums.columns() != 1) {
 			throw "Wrong WeightedSums vector size.";
 		}
@@ -52,7 +61,7 @@ public:
 		return newMatrix;
 	}
 
-	Matrix calculateDerivativeFunction(const Matrix& WeightedSums) override {
+	Matrix calculateDerivativeFunction(const Matrix& WeightedSums) const override {
 		if (WeightedSums.columns() != 1) {
 			throw "Wrong WeightedSums vector size.";
 		}
@@ -70,7 +79,7 @@ public:
 
 class Tanh : public ActivationFunction {
 public:
-	Matrix calculateFunction(const Matrix& WeightedSums) override {
+	Matrix calculateFunction(const Matrix& WeightedSums) const override {
 		if (WeightedSums.columns() != 1) {
 			throw "Wrong WeightedSums vector size.";
 		}
@@ -84,59 +93,72 @@ public:
 		return newMatrix;
 	}
 
-	Matrix calculateDerivativeFunction(const Matrix& WeightedSums) override {
-		return 1 - calculateFunction(WeightedSums) * calculateFunction(WeightedSums);
+	Matrix calculateDerivativeFunction(const Matrix& WeightedSums) const override {
+		if (WeightedSums.columns() != 1) {
+			throw "Wrong WeightedSums vector size.";
+		}
+
+		Matrix ActivatedWeightedSums = calculateFunction(WeightedSums);
+		Matrix tempMatrix = ones(WeightedSums.rows(), 1);
+		tempMatrix -= ActivatedWeightedSums.elementWiseMultiplication(ActivatedWeightedSums);
+
+		return tempMatrix;
 	}
 };
 
 class ELU : public ActivationFunction {
 public:
 	ELU(double alpha) : ActivationFunction(alpha) {}
-	Matrix calculateFunction(const Matrix& WeightedSums) override {
+	Matrix calculateFunction(const Matrix& WeightedSums) const override {
 		if (WeightedSums.columns() != 1) {
 			throw "Wrong WeightedSums vector size.";
 		}
 
-		Matrix newMatrix(WeightedSums.rows(), 1);
+		Matrix tempMatrix(WeightedSums.rows(), 1);
 		for (size_t i = 0; i < WeightedSums.rows(); ++i) {
-			newMatrix(i, 0) = WeightedSums(i, 0) > 0 ? WeightedSums(i, 0) : alpha_ * (exp(WeightedSums(i, 0) - 1));
+			tempMatrix(i, 0) = WeightedSums(i, 0) > 0 ? WeightedSums(i, 0) : alpha_ * (exp(WeightedSums(i, 0) - 1));
 		}
 
-		return newMatrix;
+		return tempMatrix;
 	}
 
-	Matrix calculateDerivativeFunction(const Matrix& WeightedSums) override {
+	Matrix calculateDerivativeFunction(const Matrix& WeightedSums) const override {
 		if (WeightedSums.columns() != 1) {
 			throw "Wrong WeightedSums vector size.";
 		}
 
-		Matrix newMatrix(WeightedSums.rows(), 1);
+		Matrix tempMatrix(WeightedSums.rows(), 1);
 		for (size_t i = 0; i < WeightedSums.rows(); ++i) {
-			newMatrix(i, 0) = WeightedSums(i, 0) > 0 ? 1 : alpha_ * (exp(WeightedSums(i, 0)));
+			tempMatrix(i, 0) = WeightedSums(i, 0) > 0 ? 1 : alpha_ * (exp(WeightedSums(i, 0)));
 		}
 
-		return newMatrix;
-
+		return tempMatrix;
 	}
 };
 
 
 class Softmax : public ActivationFunction {
 public:
-	Matrix calculateFunction(const Matrix& WeightedSums) override {
+	Matrix calculateFunction(const Matrix& WeightedSums) const override {
 		if (WeightedSums.columns() != 1) {
 			throw "Wrong WeightedSums vector size.";
 		}
 		
 		double LowerSum = 0;
+		double ExponentedElement = 0;
+		Matrix tempMatrix(WeightedSums.rows(), 1);
+		
 		for (size_t i = 0; i < WeightedSums.rows(); ++i) {
-			LowerSum += exp(WeightedSums(i, 0));
+			ExponentedElement = exp(WeightedSums(i, 0));
+			tempMatrix(i, 0) = ExponentedElement;
+			LowerSum += ExponentedElement;
 		}
 
-		Matrix newMatrix(WeightedSums.rows(), 1);
 		for (size_t i = 0; i < WeightedSums.rows(); ++i) {
-			newMatrix(i, 0) = WeightedSums(i, 0) / LowerSum;
+			tempMatrix(i, 0) /= LowerSum;
 		}
+
+		return tempMatrix;
 	}
 };
 
