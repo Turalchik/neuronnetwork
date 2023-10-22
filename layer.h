@@ -13,6 +13,8 @@ protected:
 
 	Matrix gradient_nodes_weights_;
 	Matrix gradient_nodes_biases_;
+
+	static double drand(double min, double max);
 public:
 	Layer(int input_size, int output_size);
 	virtual const Matrix& calculateLayerOutput(const Matrix& input_data, const ActivationFunction* activationFunc) = 0;
