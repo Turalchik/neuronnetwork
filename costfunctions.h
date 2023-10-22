@@ -6,7 +6,7 @@
 
 class CostFunction {
 public:
-	virtual double calculateCost(const Matrix&, const Matrix&) const = 0;
+	virtual double calculateCost(const Matrix& left, const Matrix& right) const = 0;
 };
 
 class CrossEntropy : public CostFunction {

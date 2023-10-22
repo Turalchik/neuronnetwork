@@ -19,9 +19,9 @@ NeuralNetwork::NeuralNetwork(const std::vector<int>& layers_sizes,
 }
 
 Matrix NeuralNetwork::calculateAnswer(const Matrix& input) {
-	layers_[0]->calculateOutput(input, general_activation_func_);
+	layers_[0]->calculateLayerOutput(input, general_activation_func_);
 	for (int i = 1; i < layers_.size(); ++i) {
-		layers_[i]->calculateOutput(layers_[i - 1]->getBeforeActivation(), general_activation_func_);
+		layers_[i]->calculateLayerOutput(layers_[i - 1]->getBeforeActivation(), general_activation_func_);
 	}
 	return output_activation_func_->calculateFunction(layers_[layers_.size() - 1]->getBeforeActivation());
 }
@@ -56,7 +56,7 @@ void NeuralNetwork::applyBackpropagationAlgorithm(const Matrix& ourOutputs, cons
 	//de_dt is calculated for softmax + crossentropy  /generalize
 	Matrix de_dt = ourOutputs - actualOutputs;
 	Matrix de_dh = 0;
-	for (int i = layers_.size() - 1; i > 0; --i) {
+	for (size_t i = layers_.size() - 1; i > 0; --i) {
 
 		de_dh = layers_[i]->getWeights() * transpose(de_dt);
 

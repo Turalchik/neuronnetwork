@@ -9,19 +9,22 @@ Layer::Layer(int input_size, int output_size) :
 	gradient_nodes_biases_(1, output_size) {}
 
 // можно переназвать типо fillLayer или что-то такое, чтоб понятнее было
-const Matrix& Dense::calculateOutput(const Matrix& input_data, const ActivationFunction* activationFunc) {
-	if (input_data.columns() != 1 || input_data.rows() != after_activation_.rows()) {
+const Matrix& Dense::calculateLayerOutput(const Matrix& input, const ActivationFunction* activationFunc) {
+	if (input.rows() != 1 || input.columns() != after_activation_.columns()) {
 		throw "Error in calculateOutput";
 	}
 
-	after_activation_ = activationFunc->calculateFunction(input_data);
+	after_activation_ = activationFunc->calculateFunction(input);
 	before_activation_ = (after_activation_ * weights_) + biases_;
 
 	return before_activation_;
 }
 
 // здесь тоже проверку на ошибки
-const Matrix& Input::calculateOutput(const Matrix& input, const ActivationFunction* activationFunc) {
+const Matrix& Input::calculateLayerOutput(const Matrix& input, const ActivationFunction* activationFunc) {
+	if (input.rows() != 1 || input.columns() != after_activation_.columns()) {
+		throw "Error in calculateOutput";
+	}
 	after_activation_ = input;
 	before_activation_ = (input * weights_) + biases_;
 

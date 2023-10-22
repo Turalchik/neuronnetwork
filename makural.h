@@ -15,12 +15,14 @@ class NeuralNetwork {
 	void applyBackpropagationAlgorithm(const Matrix& ourOutputs, const Matrix& actualOutputs);
 
 public:
-	NeuralNetwork(const std::vector<int>&, ActivationFunction*, ActivationFunction*, CostFunction*);
+	NeuralNetwork(const std::vector<int>& layers_sizes, ActivationFunction* general_activation_function, 
+				  ActivationFunction* output_activation_function, CostFunction* cost_func);
 
 	void optimizerSGD(const std::vector<Matrix*>& butch, const std::vector<Matrix*>& answers, 
 					  const double& eps, const double& forgetting_speed, const double& convergence_step);
 
 	Matrix calculateAnswer(const Matrix& input);
+
 	~NeuralNetwork();
 };
 

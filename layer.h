@@ -14,9 +14,8 @@ protected:
 	Matrix gradient_nodes_weights_;
 	Matrix gradient_nodes_biases_;
 public:
-	// написать в определениях функций имена аргументов
-	Layer(int, int);
-	virtual const Matrix& calculateOutput(const Matrix&, const ActivationFunction*) = 0;
+	Layer(int input_size, int output_size);
+	virtual const Matrix& calculateLayerOutput(const Matrix& input_data, const ActivationFunction* activationFunc) = 0;
 	const Matrix& getBeforeActivation() const;
 	const Matrix& getAfterActivation() const;
 	const Matrix& getWeights() const;
@@ -27,13 +26,13 @@ public:
 class Input : public Layer {
 public:
 	Input(int input_size, int output_size) : Layer(input_size, output_size){}
-	const Matrix& calculateOutput(const Matrix&, const ActivationFunction*);
+	const Matrix& calculateLayerOutput(const Matrix& input, const ActivationFunction* activationFunc);
 };
 
 class Dense : public Layer {
 public:
 	Dense(int input_size, int output_size) : Layer(input_size, output_size){}
-	const Matrix& calculateOutput(const Matrix&, const ActivationFunction*);
+	const Matrix& calculateLayerOutput(const Matrix& input, const ActivationFunction* activationFunc);
 };
 
 #endif

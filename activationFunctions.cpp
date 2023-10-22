@@ -128,6 +128,6 @@ Matrix Softmax::calculateFunction(const Matrix& WeightedSums) const {
 }
 
 Matrix Softmax::calculateDerivativeFunction(const Matrix& WeightedSums) const {
-	//доработать
-	return 0;
+	// UNSOPPORTED
+	return ULLONG_MAX;
 }
