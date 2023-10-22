@@ -1,4 +1,5 @@
 #include "makural.h"
+#include<iostream>
 
 NeuralNetwork::NeuralNetwork(const std::vector<int>& layers_sizes,
 	ActivationFunction* general_activation_function,
@@ -35,7 +36,7 @@ void NeuralNetwork::optimizerSGD(const std::vector<Matrix*>& butch, const std::v
 	Matrix tempMatrix = 0;
 
 	for (int i = 0; i < butch_size; ++i) {
-		quality_functionality += cost_func_->calculateCost(calculateAnswer(*butch[i]), *answers[i]);
+		quality_functionality += cost_func_->calculateCost(*answers[i], calculateAnswer(*butch[i]));
 	}
 	quality_functionality /= static_cast<double>(butch_size);
 
@@ -44,12 +45,13 @@ void NeuralNetwork::optimizerSGD(const std::vector<Matrix*>& butch, const std::v
 
 		tempMatrix = calculateAnswer(*butch[index_random_choice_observation]);
 
-		double cost_random_choice_observation = cost_func_->calculateCost(tempMatrix, *answers[index_random_choice_observation]);
+		double cost_random_choice_observation = cost_func_->calculateCost(*answers[index_random_choice_observation], tempMatrix);
 
 		applyBackpropagationAlgorithm(tempMatrix, *answers[index_random_choice_observation]);
 		changeWeights(convergence_step);
 
 		quality_functionality = forgetting_speed * cost_random_choice_observation + (1 - forgetting_speed) * quality_functionality;
+		std::cout << quality_functionality << std::endl;
 	}
 }
 
@@ -63,7 +65,7 @@ void NeuralNetwork::applyBackpropagationAlgorithm(const Matrix& ourOutputs, cons
 
 		layers_[i]->putGradientIntoCurrentLayer(transpose(layers_[i]->getAfterActivation()) * de_dt, std::move(de_dt));
 
-		de_dt = elementWiseMultiplication(de_dh, general_activation_func_->
+		de_dt = elementWiseMultiplication(transpose(de_dh), general_activation_func_->
 			calculateDerivativeFunction(layers_[i - 1]->getBeforeActivation()));
 	}
 	layers_[0]->putGradientIntoCurrentLayer(transpose(layers_[0]->getAfterActivation()) * de_dt, std::move(de_dt));

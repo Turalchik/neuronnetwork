@@ -4,12 +4,14 @@
 Matrix::Matrix(const size_t& rows, const size_t& columns) : rows_(rows), columns_(columns) {
 	matrix_ = new double * [rows_];
 	for (size_t i = 0; i < rows_; ++i) {
-		matrix_[i] = new double[columns_];
+		matrix_[i] = new double[columns_] {};
 	}
 }
 
 
-Matrix::Matrix(const double& X) : rows_(0), columns_(0) {
+Matrix::Matrix(const double& X) : rows_(1), columns_(1) {
+	matrix_ = new double* [rows_];
+	matrix_[0] = new double[columns_];
 	matrix_[0][0] = X;
 }
 
