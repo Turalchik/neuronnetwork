@@ -3,7 +3,6 @@
 
 #include"matrixlab.h"
 
-
 class ActivationFunction {
 protected:
 	double alpha_;
@@ -45,6 +44,7 @@ public:
 class Softmax : public ActivationFunction {
 public:
 	Matrix calculateFunction(const Matrix& WeightedSums) const override;
+	Matrix calculateDerivativeFunction(const Matrix& WeightedSums) const override;
 };
 
 

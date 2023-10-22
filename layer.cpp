@@ -8,7 +8,7 @@ Layer::Layer(int input_size, int output_size) :
 	gradient_nodes_weights_(input_size, output_size),
 	gradient_nodes_biases_(1, output_size) {}
 
-
+// можно переназвать типо fillLayer или что-то такое, чтоб понятнее было
 const Matrix& Dense::calculateOutput(const Matrix& input_data, const ActivationFunction* activationFunc) {
 	if (input_data.columns() != 1 || input_data.rows() != after_activation_.rows()) {
 		throw "Error in calculateOutput";
@@ -20,9 +20,11 @@ const Matrix& Dense::calculateOutput(const Matrix& input_data, const ActivationF
 	return before_activation_;
 }
 
+// здесь тоже проверку на ошибки
 const Matrix& Input::calculateOutput(const Matrix& input, const ActivationFunction* activationFunc) {
-	before_activation_ = (input * weights_) + biases_;
 	after_activation_ = input;
+	before_activation_ = (input * weights_) + biases_;
+
 	return before_activation_;
 }
 
@@ -34,7 +36,7 @@ const Matrix& Layer::getAfterActivation() const {
 	return after_activation_;
 }
 
-const Matrix& Layer::getWeighs() const {
+const Matrix& Layer::getWeights() const {
 	return weights_;
 }
 

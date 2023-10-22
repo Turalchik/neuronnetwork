@@ -14,11 +14,12 @@ protected:
 	Matrix gradient_nodes_weights_;
 	Matrix gradient_nodes_biases_;
 public:
+	// написать в определениях функций имена аргументов
 	Layer(int, int);
 	virtual const Matrix& calculateOutput(const Matrix&, const ActivationFunction*) = 0;
 	const Matrix& getBeforeActivation() const;
 	const Matrix& getAfterActivation() const;
-	const Matrix& getWeighs() const;
+	const Matrix& getWeights() const;
 	void putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases);
 	void setWeightsAndBiases(const Matrix& convergence_step);
 };

@@ -10,16 +10,17 @@ class NeuralNetwork {
 	ActivationFunction* general_activation_func_;
 	ActivationFunction* output_activation_func_;
 	CostFunction* cost_func_;
-public:
-	const CostFunction* getCostFunction() const {
-		return cost_func_;
-	}
-	NeuralNetwork(const std::vector<int>&, ActivationFunction*, ActivationFunction*, CostFunction*);
-	void StochasticAverageGradient(const std::vector<Matrix*>& butch, const std::vector<Matrix*>& answers, double eps, double forgetting_speed, double convergence_step);
-	const Matrix& calculateOutputs(const Matrix&);
-	Matrix calculateAnswer(const Matrix& input);
-	void applyBackpropagationAlgorithm(const Matrix& actualOutputs);
+
 	void changeWeights(const Matrix& convergence_step);
+	void applyBackpropagationAlgorithm(const Matrix& ourOutputs, const Matrix& actualOutputs);
+
+public:
+	NeuralNetwork(const std::vector<int>&, ActivationFunction*, ActivationFunction*, CostFunction*);
+
+	void optimizerSGD(const std::vector<Matrix*>& butch, const std::vector<Matrix*>& answers, 
+					  const double& eps, const double& forgetting_speed, const double& convergence_step);
+
+	Matrix calculateAnswer(const Matrix& input);
 	~NeuralNetwork();
 };
 

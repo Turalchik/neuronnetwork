@@ -126,3 +126,8 @@ Matrix Softmax::calculateFunction(const Matrix& WeightedSums) const {
 
 	return tempMatrix;
 }
+
+Matrix Softmax::calculateDerivativeFunction(const Matrix& WeightedSums) const {
+	//доработать
+	return 0;
+}

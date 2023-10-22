@@ -7,8 +7,10 @@ NeuralNetwork::NeuralNetwork(const std::vector<int>& layers_sizes,
 
 	: layers_(layers_sizes.size() - 1),
 	general_activation_func_(general_activation_function),
-	output_activation_func_(output_activation_function), cost_func_(cost_func) {
+	output_activation_func_(output_activation_function), 
+	cost_func_(cost_func) {
 
+	// продумать проверку во 2 аргументе
 	layers_[0] = new Input(layers_sizes[0], ((layers_sizes.size() > 1) ? layers_sizes[1] : 1));
 
 	for (int i = 1; i < layers_.size(); ++i) {
@@ -16,47 +18,47 @@ NeuralNetwork::NeuralNetwork(const std::vector<int>& layers_sizes,
 	}
 }
 
-const Matrix& NeuralNetwork::calculateOutputs(const Matrix& input) {
+Matrix NeuralNetwork::calculateAnswer(const Matrix& input) {
 	layers_[0]->calculateOutput(input, general_activation_func_);
 	for (int i = 1; i < layers_.size(); ++i) {
 		layers_[i]->calculateOutput(layers_[i - 1]->getBeforeActivation(), general_activation_func_);
 	}
-	return layers_[layers_.size() - 1]->getBeforeActivation();
+	return output_activation_func_->calculateFunction(layers_[layers_.size() - 1]->getBeforeActivation());
 }
 
-Matrix NeuralNetwork::calculateAnswer(const Matrix& input) {
-	return output_activation_func_->calculateFunction(calculateOutputs(input));
-}
-
-void NeuralNetwork::StochasticAverageGradient(const std::vector<Matrix*>& butch, const std::vector<Matrix*>& answers, double eps, double forgetting_speed, double convergence_step) {
+void NeuralNetwork::optimizerSGD(const std::vector<Matrix*>& butch, const std::vector<Matrix*>& answers, 
+								const double& eps, const double& forgetting_speed, const double& convergence_step) {
 
 	double quality_functionality = 0.0;
-	const CostFunction* cost_function_current_neural_network = getCostFunction();
+	size_t butch_size = butch.size();
+	Matrix tempMatrix = 0;
 
-	for (int i = 0; i < butch.size(); ++i) {
-		quality_functionality += cost_function_current_neural_network->calculateCost
-		(calculateAnswer(*butch[i]), *answers[i]) / static_cast<double>(butch.size());
+	for (int i = 0; i < butch_size; ++i) {
+		quality_functionality += cost_func_->calculateCost(calculateAnswer(*butch[i]), *answers[i]);
 	}
+	quality_functionality /= static_cast<double>(butch_size);
 
 	while (quality_functionality > eps) {
-		int index_random_choice_observation = rand() % butch.size();
+		int index_random_choice_observation = rand() % butch_size;
 
-		double cost_random_choice_observation = cost_function_current_neural_network->calculateCost
-		(calculateAnswer(*butch[index_random_choice_observation]), *answers[index_random_choice_observation]);
+		tempMatrix = calculateAnswer(*butch[index_random_choice_observation]);
 
-		applyBackpropagationAlgorithm(*answers[index_random_choice_observation]);
+		double cost_random_choice_observation = cost_func_->calculateCost(tempMatrix, *answers[index_random_choice_observation]);
+
+		applyBackpropagationAlgorithm(tempMatrix, *answers[index_random_choice_observation]);
 		changeWeights(convergence_step);
+
 		quality_functionality = forgetting_speed * cost_random_choice_observation + (1 - forgetting_speed) * quality_functionality;
 	}
 }
 
-void NeuralNetwork::applyBackpropagationAlgorithm(const Matrix& actualOutputs) {
+void NeuralNetwork::applyBackpropagationAlgorithm(const Matrix& ourOutputs, const Matrix& actualOutputs) {
 	//de_dt is calculated for softmax + crossentropy  /generalize
-	Matrix de_dt = output_activation_func_->calculateFunction(layers_[layers_.size() - 1]->getBeforeActivation()) - actualOutputs;
+	Matrix de_dt = ourOutputs - actualOutputs;
 	Matrix de_dh = 0;
 	for (int i = layers_.size() - 1; i > 0; --i) {
 
-		de_dh = layers_[i]->getWeighs() * transpose(de_dt);
+		de_dh = layers_[i]->getWeights() * transpose(de_dt);
 
 		layers_[i]->putGradientIntoCurrentLayer(transpose(layers_[i]->getAfterActivation()) * de_dt, std::move(de_dt));
 
