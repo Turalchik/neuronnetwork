@@ -10,11 +10,12 @@ NeuralNetwork::NeuralNetwork(const std::vector<int>& layers_sizes,
 	output_activation_func_(output_activation_function), 
 	cost_func_(cost_func) {
 
-	// продумать проверку во 2 аргументе
 	layers_[0] = new Input(layers_sizes[0], ((layers_sizes.size() > 1) ? layers_sizes[1] : 1));
+	layers_[0]->initializeWeightsAndBiasesFromRange(-1, 1);
 
 	for (int i = 1; i < layers_.size(); ++i) {
 		layers_[i] = new Dense(layers_sizes[i], layers_sizes[i + 1]);
+		layers_[i]->initializeWeightsAndBiasesFromRange(-1, 1);
 	}
 }
 
@@ -71,7 +72,7 @@ void NeuralNetwork::applyBackpropagationAlgorithm(const Matrix& ourOutputs, cons
 
 void NeuralNetwork::changeWeights(const Matrix& convergence_step) {
 	for (int i = 0; i < layers_.size(); ++i) {
-		layers_[i]->setWeightsAndBiases(convergence_step);
+		layers_[i]->changeWeightsAndBiasesByGradient(convergence_step);
 	}
 }
 

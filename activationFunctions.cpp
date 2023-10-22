@@ -129,5 +129,5 @@ Matrix Softmax::calculateFunction(const Matrix& WeightedSums) const {
 
 Matrix Softmax::calculateDerivativeFunction(const Matrix& WeightedSums) const {
 	// UNSOPPORTED
-	return ULLONG_MAX;
+	return 0;
 }

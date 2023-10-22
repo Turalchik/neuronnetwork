@@ -15,7 +15,6 @@ class Matrix {
 		std::swap(matrix_, other.matrix_);
 	}
 
-	static double drand(double min, double max);
 public:
 	Matrix(const size_t& rows, const size_t& columns);
 	Matrix(const double& X);
@@ -45,6 +44,7 @@ public:
 
 	Matrix& elementWiseMultiplication(const Matrix& other);
 	Matrix& elementWiseDivision(const Matrix& other);
+	void FillMatrixByRandomNumbers(const double& begin, const double& end);
 };
 
 Matrix operator+ (const Matrix& X, const Matrix& Y);
@@ -61,5 +61,5 @@ Matrix elementWiseMultiplication(const Matrix& X, const Matrix& Y);
 Matrix elementWiseDivision(const Matrix& X, const Matrix& Y);
 bool operator== (const Matrix& x, const Matrix& y);
 bool operator!= (const Matrix& x, const Matrix& y);
-
+double drand(const double& begin, const double& end);
 #endif

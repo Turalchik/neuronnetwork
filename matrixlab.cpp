@@ -228,7 +228,13 @@ Matrix& Matrix::elementWiseDivision(const Matrix& other) {
 	throw "Element-wise multiplication is not possible.";
 }
 
-
+void Matrix::FillMatrixByRandomNumbers(const double& begin, const double& end) {
+	for (size_t i = 0; i < rows_; ++i) {
+		for (size_t j = 0; j < columns_; ++j) {
+			matrix_[i][j] = drand(begin, end);
+		}
+	}
+}
 
 Matrix operator+ (const Matrix& X, const Matrix& Y) {
 	Matrix tempObj(X);
@@ -406,8 +412,8 @@ bool operator!= (const Matrix& X, const Matrix& Y) {
 	return !(X == Y);
 }
 
-double Matrix::drand(double min, double max) {
+double drand(const double& begin, const double& end) {
 	int first = rand();
 	int second = rand();
-	return min + (max - min) * ((first < second) ? (double)first / (double)second : (double)second / (double)first);
+	return begin + (end - begin) * ((first < second) ? (double)first / (double)second : (double)second / (double)first);
 }

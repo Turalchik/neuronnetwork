@@ -8,7 +8,6 @@ Layer::Layer(int input_size, int output_size) :
 	gradient_nodes_weights_(input_size, output_size),
 	gradient_nodes_biases_(1, output_size) {}
 
-// можно переназвать типо fillLayer или что-то такое, чтоб понятнее было
 const Matrix& Dense::calculateLayerOutput(const Matrix& input, const ActivationFunction* activationFunc) {
 	if (input.rows() != 1 || input.columns() != after_activation_.columns()) {
 		throw "Error in calculateOutput";
@@ -20,7 +19,6 @@ const Matrix& Dense::calculateLayerOutput(const Matrix& input, const ActivationF
 	return before_activation_;
 }
 
-// здесь тоже проверку на ошибки
 const Matrix& Input::calculateLayerOutput(const Matrix& input, const ActivationFunction* activationFunc) {
 	if (input.rows() != 1 || input.columns() != after_activation_.columns()) {
 		throw "Error in calculateOutput";
@@ -48,7 +46,12 @@ void Layer::putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases) {
 	gradient_nodes_biases_ = biases;
 }
 
-void Layer::setWeightsAndBiases(const Matrix& convergence_step) {
+void Layer::changeWeightsAndBiasesByGradient(const Matrix& convergence_step) {
 	weights_ -= convergence_step * gradient_nodes_weights_;
 	biases_ -= convergence_step * gradient_nodes_biases_;
+}
+
+void Layer::initializeWeightsAndBiasesFromRange(const double& begin, const double& end) {
+	weights_.FillMatrixByRandomNumbers(begin, end);
+	biases_.FillMatrixByRandomNumbers(begin, end);
 }

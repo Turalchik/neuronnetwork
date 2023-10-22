@@ -13,8 +13,6 @@ protected:
 
 	Matrix gradient_nodes_weights_;
 	Matrix gradient_nodes_biases_;
-
-	static double drand(double min, double max);
 public:
 	Layer(int input_size, int output_size);
 	virtual const Matrix& calculateLayerOutput(const Matrix& input_data, const ActivationFunction* activationFunc) = 0;
@@ -22,7 +20,8 @@ public:
 	const Matrix& getAfterActivation() const;
 	const Matrix& getWeights() const;
 	void putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases);
-	void setWeightsAndBiases(const Matrix& convergence_step);
+	void changeWeightsAndBiasesByGradient(const Matrix& convergence_step);
+	void initializeWeightsAndBiasesFromRange(const double& begin, const double& end);
 };
 
 class Input : public Layer {
