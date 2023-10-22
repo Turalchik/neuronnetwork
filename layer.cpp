@@ -52,9 +52,3 @@ void Layer::setWeightsAndBiases(const Matrix& convergence_step) {
 	weights_ -= convergence_step * gradient_nodes_weights_;
 	biases_ -= convergence_step * gradient_nodes_biases_;
 }
-
-double Layer::drand(double min, double max) {
-	int first = rand();
-	int second = rand();
-	return min + (max - min) * ((first < second) ? (double)first / (double)second : (double)second / (double)first);
-}

@@ -15,6 +15,7 @@ class Matrix {
 		std::swap(matrix_, other.matrix_);
 	}
 
+	static double drand(double min, double max);
 public:
 	Matrix(const size_t& rows, const size_t& columns);
 	Matrix(const double& X);

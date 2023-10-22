@@ -405,3 +405,9 @@ bool operator== (const Matrix& X, const Matrix& Y) {
 bool operator!= (const Matrix& X, const Matrix& Y) {
 	return !(X == Y);
 }
+
+double Matrix::drand(double min, double max) {
+	int first = rand();
+	int second = rand();
+	return min + (max - min) * ((first < second) ? (double)first / (double)second : (double)second / (double)first);
+}
