@@ -1,8 +1,9 @@
 #ifndef COST_FUNCTIONS_MAKURAL
 #define COST_FUNCTIONS_MAKURAL
 
-#include <cmath>
+
 #include "matrixlab.h"
+#include<iostream>
 
 class CostFunction {
 public:
@@ -19,6 +20,10 @@ public:
 		double cost = 0.0;
 		for (int row = 0; row < left.rows(); ++row) {
 			for (int col = 0; col < right.columns(); ++col) {
+				if (right(row, col) <= 0) {
+					std::cout << right(row, col) << std::endl;
+					std::cout << "NAN" << std::endl;
+				}
 				cost += left(row, col) * std::log(right(row, col));
 			}
 		}

@@ -41,6 +41,12 @@ const Matrix& Layer::getWeights() const {
 	return weights_;
 }
 
+void Layer::averageGradient(const Matrix& butch_size) {
+	gradient_nodes_weights_ /= butch_size;
+	gradient_nodes_biases_ /= butch_size;
+
+}
+
 void Layer::putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases) {
 	gradient_nodes_weights_ = weights;
 	gradient_nodes_biases_ = biases;
@@ -49,6 +55,11 @@ void Layer::putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases) {
 void Layer::changeWeightsAndBiasesByGradient(const Matrix& convergence_step) {
 	weights_ -= convergence_step * gradient_nodes_weights_;
 	biases_ -= convergence_step * gradient_nodes_biases_;
+}
+
+void Layer::addGradientToCurrentLayer(const Matrix& weights, const Matrix& biases) {
+	gradient_nodes_weights_ += weights;
+	gradient_nodes_biases_ += biases;
 }
 
 void Layer::initializeWeightsAndBiasesFromRange(const double& begin, const double& end) {

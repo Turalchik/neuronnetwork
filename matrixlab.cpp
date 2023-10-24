@@ -179,7 +179,17 @@ Matrix& Matrix::operator*= (const Matrix& other) {
 
 
 Matrix& Matrix::operator/= (const Matrix& other) {
-	*this *= invMatrix(other);
+	if (other.rows_ == 1 && other.columns_ == 1) {
+		for (size_t i = 0; i < rows_; ++i) {
+			for (size_t j = 0; j < columns_; ++j) {
+				matrix_[i][j] /= other.matrix_[0][0];
+			}
+		}
+	}
+	else {
+		*this *= invMatrix(other);
+	}
+
 	return *this;
 }
 
@@ -236,6 +246,30 @@ void Matrix::FillMatrixByRandomNumbers(const double& begin, const double& end) {
 			matrix_[i][j] = drand(begin, end);
 		}
 	}
+}
+
+double Matrix::minElement() const {
+	double min_element = matrix_[0][0];
+	for (size_t i = 0; i < rows_; ++i) {
+		for (size_t j = 0; j < columns_; ++j) {
+			if (matrix_[i][j] < min_element) {
+				min_element = matrix_[i][j];
+			}
+		}
+	}
+	return min_element;
+}
+
+double Matrix::maxElement() const {
+	double max_element = matrix_[0][0];
+	for (size_t i = 0; i < rows_; ++i) {
+		for (size_t j = 0; j < columns_; ++j) {
+			if (matrix_[i][j] > max_element) {
+				max_element = matrix_[i][j];
+			}
+		}
+	}
+	return max_element;
 }
 
 Matrix operator+ (const Matrix& X, const Matrix& Y) {
@@ -335,50 +369,6 @@ Matrix invMatrix(const Matrix& X) {
 
 	throw "Inverse matrix can not be calculated.";
 }
-
-
-Matrix det(const Matrix& X) {
-
-	if (X.rows() == X.columns()) {
-		Matrix tempObj(X);
-		double tempValue;
-		size_t rowIndex;
-		bool detSign = false;
-
-		for (size_t diagonalIndex = 0; diagonalIndex < tempObj.rows(); ++diagonalIndex) {
-
-			rowIndex = diagonalIndex;
-			while (rowIndex < tempObj.rows() && tempObj(rowIndex, diagonalIndex) == 0) {
-				++rowIndex;
-			}
-
-			if (rowIndex == tempObj.rows()) {
-				continue;
-			}
-
-			if (rowIndex != diagonalIndex) {
-				detSign = !detSign;
-				std::swap(tempObj(diagonalIndex), tempObj(rowIndex));
-			}
-
-			for (size_t i = diagonalIndex + 1; i < tempObj.rows(); ++i) {
-				tempValue = tempObj(i, diagonalIndex) / tempObj(diagonalIndex, diagonalIndex);
-				for (size_t j = diagonalIndex; j < tempObj.columns(); ++j) {
-					tempObj(i, j) -= tempObj(diagonalIndex, j) * tempValue;
-				}
-			}
-		}
-
-		tempValue = 1;
-		for (size_t diagonalIndex = 0; diagonalIndex < tempObj.rows(); ++diagonalIndex) {
-			tempValue *= tempObj(diagonalIndex, diagonalIndex);
-		}
-
-		return (detSign ? Matrix(-tempValue) : Matrix(tempValue));
-	}
-	throw "Determinant of non-square matrix can't be calculated.";
-}
-
 
 Matrix elementWiseMultiplication(const Matrix& X, const Matrix& Y) {
 	Matrix tempObj(X);

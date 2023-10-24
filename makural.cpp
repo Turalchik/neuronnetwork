@@ -1,6 +1,19 @@
 #include "makural.h"
 #include<iostream>
 
+void NeuralNetwork::shuffle(std::vector<Matrix*>& data, std::vector<Matrix*>& answers) {
+	int random = 0;
+	for (int i = 0; i < data.size(); ++i) {
+		random = rand() % data.size();
+		if (i == random) {
+			--i;
+			continue;
+		}
+		std::swap(data[i], data[random]);
+		std::swap(answers[i], answers[random]);
+	}
+}
+
 NeuralNetwork::NeuralNetwork(const std::vector<int>& layers_sizes,
 	ActivationFunction* general_activation_function,
 	ActivationFunction* output_activation_function,
@@ -28,34 +41,47 @@ Matrix NeuralNetwork::calculateAnswer(const Matrix& input) {
 	return output_activation_func_->calculateFunction(layers_[layers_.size() - 1]->getBeforeActivation());
 }
 
-void NeuralNetwork::optimizerSGD(const std::vector<Matrix*>& butch, const std::vector<Matrix*>& answers, 
-								const double& eps, const double& forgetting_speed, const double& convergence_step) {
+void NeuralNetwork::train(std::vector<Matrix*>& data_train, std::vector<Matrix*>& answers_train, 
+						  std::vector<Matrix*>& data_test, std::vector<Matrix*>& answers_test, size_t epochs, size_t butchSize) {
 
-	double quality_functionality = 0.0;
-	size_t butch_size = butch.size();
-	Matrix tempMatrix = 0;
+	double LEARNING_RATE = 0.001;
 
-	for (int i = 0; i < butch_size; ++i) {
-		quality_functionality += cost_func_->calculateCost(*answers[i], calculateAnswer(*butch[i]));
+	for (size_t j = 0; j < epochs; ++j) {
+		shuffle(data_train, answers_train);
+		for (size_t i = 0; i < data_train.size() / butchSize; ++i) {
+			std::vector<Matrix*> butch(data_train.begin() + i * butchSize, data_train.begin() + (i + 1) * butchSize);
+			std::vector<Matrix*> butchOfAnswers(answers_train.begin() + i * butchSize, answers_train.begin() + (i + 1) * butchSize);
+			optimizerSGD(butch, butchOfAnswers, LEARNING_RATE);
+		}
+		if (data_train.size() % butchSize != 0) {
+			std::vector<Matrix*> butch(data_train.end() - data_train.size() % butchSize, data_train.end());
+			std::vector<Matrix*> butchOfAnswers(answers_train.end() - data_train.size() % butchSize, answers_train.end());
+			optimizerSGD(butch, butchOfAnswers, LEARNING_RATE);
+		}
+
+		double error = 0.0;
+		for (size_t i = 0; i < data_test.size(); ++i) {
+			error += cost_func_->calculateCost(*answers_test[i], calculateAnswer(*data_test[i]));
+		}
+		error /= data_test.size();
+		std::cout << "epoch " << j + 1 << ": Error " << error << std::endl;
+
 	}
-	quality_functionality /= static_cast<double>(butch_size);
 
-	while (quality_functionality > eps) {
-		int index_random_choice_observation = rand() % butch_size;
-
-		tempMatrix = calculateAnswer(*butch[index_random_choice_observation]);
-
-		double cost_random_choice_observation = cost_func_->calculateCost(*answers[index_random_choice_observation], tempMatrix);
-
-		applyBackpropagationAlgorithm(tempMatrix, *answers[index_random_choice_observation]);
-		changeWeights(convergence_step);
-
-		quality_functionality = forgetting_speed * cost_random_choice_observation + (1 - forgetting_speed) * quality_functionality;
-		std::cout << quality_functionality << std::endl;
-	}
 }
 
-void NeuralNetwork::applyBackpropagationAlgorithm(const Matrix& ourOutputs, const Matrix& actualOutputs) {
+void NeuralNetwork::optimizerSGD(const std::vector<Matrix*>& butch, const std::vector<Matrix*>& answers, const double& learning_rate) {
+	applySuitBackpropagationAlgorithm(calculateAnswer(*butch[0]), *answers[0]);
+	for (size_t i = 1; i < butch.size(); ++i) {
+		applyGeneralBackpropagationAlgorithm(calculateAnswer(*butch[i]), *answers[i]);
+	}
+	for (size_t i = 0; i < layers_.size(); ++i) {
+		layers_[i]->averageGradient(butch.size());
+	}
+	changeWeights(learning_rate);
+}
+
+void NeuralNetwork::applySuitBackpropagationAlgorithm(const Matrix& ourOutputs, const Matrix& actualOutputs) {
 	//de_dt is calculated for softmax + crossentropy  /generalize
 	Matrix de_dt = ourOutputs - actualOutputs;
 	Matrix de_dh = 0;
@@ -70,6 +96,24 @@ void NeuralNetwork::applyBackpropagationAlgorithm(const Matrix& ourOutputs, cons
 	}
 	layers_[0]->putGradientIntoCurrentLayer(transpose(layers_[0]->getAfterActivation()) * de_dt, std::move(de_dt));
 }
+
+void NeuralNetwork::applyGeneralBackpropagationAlgorithm(const Matrix& ourOutputs, const Matrix& actualOutputs) {
+	//de_dt is calculated for softmax + crossentropy  /generalize
+	Matrix de_dt = ourOutputs - actualOutputs;
+	Matrix de_dh = 0;
+	for (size_t i = layers_.size() - 1; i > 0; --i) {
+
+		de_dh = layers_[i]->getWeights() * transpose(de_dt);
+
+		layers_[i]->addGradientToCurrentLayer(transpose(layers_[i]->getAfterActivation()) * de_dt, de_dt);
+
+		de_dt = elementWiseMultiplication(transpose(de_dh), general_activation_func_->
+			calculateDerivativeFunction(layers_[i - 1]->getBeforeActivation()));
+	}
+	layers_[0]->addGradientToCurrentLayer(transpose(layers_[0]->getAfterActivation()) * de_dt, de_dt);
+}
+
+
 
 
 void NeuralNetwork::changeWeights(const Matrix& convergence_step) {

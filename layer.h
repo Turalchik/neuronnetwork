@@ -19,9 +19,21 @@ public:
 	const Matrix& getBeforeActivation() const;
 	const Matrix& getAfterActivation() const;
 	const Matrix& getWeights() const;
+	const Matrix& getBiases() const {
+		return biases_;
+	}
+	void averageGradient(const Matrix& butch_size);
 	void putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases);
+	void addGradientToCurrentLayer(const Matrix& weights, const Matrix& biases);
 	void changeWeightsAndBiasesByGradient(const Matrix& convergence_step);
 	void initializeWeightsAndBiasesFromRange(const double& begin, const double& end);
+
+	const Matrix& getGradientsForWeights() const {
+		return gradient_nodes_weights_;
+	}
+	const Matrix& getGradientsForBiases() const {
+		return gradient_nodes_biases_;
+	}
 };
 
 class Input : public Layer {

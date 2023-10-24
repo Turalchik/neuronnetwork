@@ -5,9 +5,10 @@
 enum CONSTANTS
 {
 	TRAIN_DATA_VOLUME = 10'000,
+	TEST_DATA_VOLUME = 10'000,
 	INPUT_NEURON_AMOUNT = 784,
 	OUTPUT_NEURON_AMOUNT = 10,
-	BUTCH_SIZE = 100,
+	BUTCH_SIZE = 32,
 	EPOCHS_AMOUNT = 20,
 };
 
@@ -26,49 +27,62 @@ void shuffle(std::vector<Matrix*>& data, std::vector<Matrix*>& answers) {
 
 int main() {
 	srand(time(NULL));
-	std::ifstream train_dataset("mnist_test.csv");
-	std::ifstream test_dataset("mnist_test.csv");
-	std::vector<Matrix*> data(TRAIN_DATA_VOLUME);
-	std::vector<Matrix*> answers(TRAIN_DATA_VOLUME);
+	std::ifstream train("mnist_train_2.csv");
+	std::ifstream test("mnist_test.csv");
 
-	NeuralNetwork makural({784, 128, 32, 10}, new ReLu, new Softmax, new CrossEntropy);
+	std::vector<Matrix*> data_train(TRAIN_DATA_VOLUME);
+	std::vector<Matrix*> answers_train(TRAIN_DATA_VOLUME);
+
+	std::vector<Matrix*> data_test(TEST_DATA_VOLUME);
+	std::vector<Matrix*> answers_test(TEST_DATA_VOLUME);
+
+	NeuralNetwork makural({784, 128, 10}, new ReLu, new Softmax, new CrossEntropy);
 
 	size_t rowIndex = 0;
 	int get = 0;
 
-	while (train_dataset.get() != '\n') {}
+	while (train.get() != '\n') {}
 
-	while (!train_dataset.eof()) {
-		
-		answers[rowIndex] = new Matrix(1, OUTPUT_NEURON_AMOUNT);
-		(*answers[rowIndex])(0, train_dataset.get() - '0') = 1.0;
-		train_dataset.ignore();
+	std::cout << "Loading dataset..." << std::endl;
 
-		data[rowIndex] = new Matrix(1, INPUT_NEURON_AMOUNT);
+	while (!train.eof()) {
+		answers_train[rowIndex] = new Matrix(1, OUTPUT_NEURON_AMOUNT);
+		(*answers_train[rowIndex])(0, train.get() - '0') = 1.0;
+		train.ignore();
+
+		data_train[rowIndex] = new Matrix(1, INPUT_NEURON_AMOUNT);
 		for (int i = 0; i < INPUT_NEURON_AMOUNT; ++i) {
-			train_dataset >> get;
-			(*data[rowIndex])(0, i) = static_cast<double>(get) / 255.0;
-			train_dataset.ignore();
+			train >> get;
+			(*data_train[rowIndex])(0, i) = static_cast<double>(get) / 255.0;
+			train.ignore();
 		}
 		++rowIndex;
-		while ((isdigit(train_dataset.peek()) == 0) && train_dataset.get() != EOF) {}
+		while ((isdigit(train.peek()) == 0) && train.get() != EOF) {}
 	}
 
-	for (int j = 0; j < EPOCHS_AMOUNT; ++j) {
-		shuffle(data, answers);
-		for (int i = 0; i < TRAIN_DATA_VOLUME / BUTCH_SIZE; ++i) {
-			std::vector<Matrix*> butch(data.begin() + i * BUTCH_SIZE, data.begin() + (i + 1) * BUTCH_SIZE);
-			std::vector<Matrix*> butchOfAnswers(answers.begin() + i * BUTCH_SIZE, answers.begin() + (i + 1) * BUTCH_SIZE);
-			makural.optimizerSGD(butch, butchOfAnswers, 0.01, 0.02, 0.0005);
-			std::cout << "Butch passed" << std::endl;
+	rowIndex = 0;
+
+	while (test.get() != '\n') {}
+
+	while (!test.eof()) {
+		answers_test[rowIndex] = new Matrix(1, OUTPUT_NEURON_AMOUNT);
+		(*answers_test[rowIndex])(0, test.get() - '0') = 1.0;
+		test.ignore();
+
+		data_test[rowIndex] = new Matrix(1, INPUT_NEURON_AMOUNT);
+		for (int i = 0; i < INPUT_NEURON_AMOUNT; ++i) {
+			test >> get;
+			(*data_test[rowIndex])(0, i) = static_cast<double>(get) / 255.0;
+			test.ignore();
 		}
-		if (TRAIN_DATA_VOLUME % BUTCH_SIZE != 0) {
-			std::vector<Matrix*> butch(data.end() - TRAIN_DATA_VOLUME % BUTCH_SIZE, data.end());
-			std::vector<Matrix*> butchOfAnswers(answers.end() - TRAIN_DATA_VOLUME % BUTCH_SIZE, answers.end());
-			makural.optimizerSGD(butch, butchOfAnswers, 0.01, 0.02, 0.0005);
-		}
-		std::cout << "Epoch passed" << std::endl;
+		++rowIndex;
+		while ((isdigit(test.peek()) == 0) && test.get() != EOF) {}
 	}
-	
+
+	std::cout << "Dataset was loaded, start training" << std::endl << std::endl;
+
+	makural.train(data_train, answers_train, data_test, answers_test, EPOCHS_AMOUNT, BUTCH_SIZE);
+
+
 	return 0;
 }
