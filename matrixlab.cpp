@@ -24,6 +24,42 @@ Matrix::Matrix(const Matrix& other) : Matrix(other.rows_, other.columns_) {
 	}
 }
 
+Matrix Matrix::multiplicationByTransposeMatrix(const Matrix& other) const {
+	if (columns_ != other.columns_) {
+		throw "Incorrect size";
+	}
+
+	Matrix result(rows_, other.rows_);
+
+	for (int row = 0; row < result.rows_; ++row) {
+		for (int col = 0; col < result.columns_; ++col) {
+			for (int gen = 0; gen < columns_; ++gen) {
+				result.matrix_[row][col] += matrix_[row][gen] * other.matrix_[col][gen];
+			}
+		}
+	}
+
+	return result;
+}
+
+Matrix Matrix::multiplicationTransposeByMatrix(const Matrix& other) const {
+	if (rows_ != other.rows_) {
+		throw "Incorrect size";
+	}
+
+	Matrix result(columns_, other.columns_);
+
+	for (int row = 0; result.rows_; ++row) {
+		for (int col = 0; col < result.columns_; ++col) {
+			for (int gen = 0; gen < rows_; ++gen) {
+				result.matrix_[row][col] += matrix_[gen][row] * other.matrix_[gen][col];
+			}
+		}
+	}
+
+	return result;
+}
+
 
 Matrix::Matrix(Matrix&& other) noexcept {
 	matrix_ = nullptr;

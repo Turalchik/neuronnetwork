@@ -44,6 +44,8 @@ public:
 
 	Matrix& elementWiseMultiplication(const Matrix& other);
 	Matrix& elementWiseDivision(const Matrix& other);
+	Matrix multiplicationByTransposeMatrix(const Matrix& other) const;
+	Matrix multiplicationTransposeByMatrix(const Matrix& other) const;
 	void FillMatrixByRandomNumbers(const double& begin, const double& end);
 	double minElement() const;
 	double maxElement() const;
