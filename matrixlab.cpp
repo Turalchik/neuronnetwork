@@ -1,8 +1,9 @@
 #include "matrixlab.h"
-
+#include<iostream>
+#include<random>
 
 Matrix::Matrix(const size_t& rows, const size_t& columns) : rows_(rows), columns_(columns) {
-	matrix_ = new double * [rows_];
+	matrix_ = new double* [rows_];
 	for (size_t i = 0; i < rows_; ++i) {
 		matrix_[i] = new double[columns_] {};
 	}
@@ -49,7 +50,7 @@ Matrix Matrix::multiplicationTransposeByMatrix(const Matrix& other) const {
 
 	Matrix result(columns_, other.columns_);
 
-	for (int row = 0; result.rows_; ++row) {
+	for (int row = 0; row < result.rows_; ++row) {
 		for (int col = 0; col < result.columns_; ++col) {
 			for (int gen = 0; gen < rows_; ++gen) {
 				result.matrix_[row][col] += matrix_[gen][row] * other.matrix_[gen][col];
@@ -263,6 +264,19 @@ Matrix& Matrix::elementWiseMultiplication(const Matrix& other) {
 	throw "Element-wise multiplication is not possible.";
 }
 
+Matrix Matrix::elementWiseMultiplicationTransposeByMatrix(Matrix&& other) const {
+	if (columns_ == other.rows_ && rows_ == other.columns_) {
+		for (size_t i = 0; i < columns_; ++i) {
+			for (size_t j = 0; j < rows_; ++j) {
+				other.matrix_[i][j] *= matrix_[j][i];
+			}
+		}
+
+		return other;
+	}
+	throw "Element-wise multiplication is not possible.";
+}
+
 Matrix& Matrix::elementWiseDivision(const Matrix& other) {
 	if (rows_ == other.rows_ && columns_ == other.columns_) {
 		for (size_t i = 0; i < rows_; ++i) {
@@ -270,16 +284,28 @@ Matrix& Matrix::elementWiseDivision(const Matrix& other) {
 				matrix_[i][j] /= other.matrix_[i][j];
 			}
 		}
-		
+
 		return *this;
 	}
 	throw "Element-wise multiplication is not possible.";
 }
 
-void Matrix::FillMatrixByRandomNumbers(const double& begin, const double& end) {
+void Matrix::FillMatrixByRandomNumbers(const double& afterActivationSize) {
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::normal_distribution<double> dis(0.0, std::sqrt(2.0 / afterActivationSize));
+
 	for (size_t i = 0; i < rows_; ++i) {
 		for (size_t j = 0; j < columns_; ++j) {
-			matrix_[i][j] = drand(begin, end);
+			matrix_[i][j] = dis(gen);
+		}
+	}
+}
+
+void Matrix::fillWithZeros() {
+	for (size_t i = 0; i < rows_; ++i) {
+		for (size_t j = 0; j < columns_; ++j) {
+			matrix_[i][j] = 0.0;
 		}
 	}
 }
@@ -438,10 +464,4 @@ bool operator== (const Matrix& X, const Matrix& Y) {
 
 bool operator!= (const Matrix& X, const Matrix& Y) {
 	return !(X == Y);
-}
-
-double drand(const double& begin, const double& end) {
-	int first = rand();
-	int second = rand();
-	return begin + (end - begin) * ((first < second) ? (double)first / (double)second : (double)second / (double)first);
 }

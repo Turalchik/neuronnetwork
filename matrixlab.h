@@ -3,6 +3,7 @@
 
 #include<fstream>
 #include<string>
+#include<random>
 
 class Matrix {
 	size_t rows_;
@@ -43,10 +44,12 @@ public:
 	const double& operator() (const size_t& i, const size_t& j) const;
 
 	Matrix& elementWiseMultiplication(const Matrix& other);
+	Matrix elementWiseMultiplicationTransposeByMatrix(Matrix&& other) const;
 	Matrix& elementWiseDivision(const Matrix& other);
 	Matrix multiplicationByTransposeMatrix(const Matrix& other) const;
 	Matrix multiplicationTransposeByMatrix(const Matrix& other) const;
-	void FillMatrixByRandomNumbers(const double& begin, const double& end);
+	void FillMatrixByRandomNumbers(const double& afterActivationSize);
+	void fillWithZeros();
 	double minElement() const;
 	double maxElement() const;
 };
@@ -64,6 +67,5 @@ Matrix elementWiseMultiplication(const Matrix& X, const Matrix& Y);
 Matrix elementWiseDivision(const Matrix& X, const Matrix& Y);
 bool operator== (const Matrix& x, const Matrix& y);
 bool operator!= (const Matrix& x, const Matrix& y);
-double drand(const double& begin, const double& end);
 
 #endif

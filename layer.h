@@ -26,7 +26,7 @@ public:
 	void putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases);
 	void addGradientToCurrentLayer(const Matrix& weights, const Matrix& biases);
 	void changeWeightsAndBiasesByGradient(const Matrix& convergence_step);
-	void initializeWeightsAndBiasesFromRange(const double& begin, const double& end);
+	void initializeWeightsAndBiases();
 
 	const Matrix& getGradientsForWeights() const {
 		return gradient_nodes_weights_;

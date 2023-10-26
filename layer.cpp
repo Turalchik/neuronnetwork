@@ -62,7 +62,7 @@ void Layer::addGradientToCurrentLayer(const Matrix& weights, const Matrix& biase
 	gradient_nodes_biases_ += biases;
 }
 
-void Layer::initializeWeightsAndBiasesFromRange(const double& begin, const double& end) {
-	weights_.FillMatrixByRandomNumbers(begin, end);
-	biases_.FillMatrixByRandomNumbers(begin, end);
+void Layer::initializeWeightsAndBiases() {
+	weights_.FillMatrixByRandomNumbers(after_activation_.columns());
+	biases_.fillWithZeros();
 }

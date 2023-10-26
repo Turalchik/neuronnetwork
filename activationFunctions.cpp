@@ -1,4 +1,5 @@
 #include"activationFunctions.h"
+#include<iostream>
 
 Matrix Sigmoid::calculateFunction(const Matrix& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
