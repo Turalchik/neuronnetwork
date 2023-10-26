@@ -33,6 +33,42 @@ NeuralNetwork::NeuralNetwork(const std::vector<int>& layers_sizes,
 	}
 }
 
+NeuralNetwork::NeuralNetwork(const char* input_filename,
+	ActivationFunction* general_activation_function,
+	ActivationFunction* output_activation_function,
+	CostFunction* cost_func)
+
+	: general_activation_func_(general_activation_function),
+ 	  output_activation_func_(output_activation_function),
+	  cost_func_(cost_func) {
+
+	std::ifstream inFile(input_filename);
+
+	if (!inFile.is_open()) {
+		throw "File hasn't been loaded.";
+	}
+	
+	size_t tempNumber = 0;
+	inFile >> tempNumber;
+	std::vector<int> layers_sizes(tempNumber);
+	for (size_t i = 0; i < layers_sizes.size(); ++i) {
+		inFile >> tempNumber;
+		layers_sizes[i] = tempNumber;
+	}
+
+	layers_.resize(layers_sizes.size() - 1);
+
+	layers_[0] = new Input(layers_sizes[0], ((layers_sizes.size() > 1) ? layers_sizes[1] : 1));
+	layers_[0]->loadWeightsAndBiases(inFile);
+
+	for (int i = 1; i < layers_.size(); ++i) {
+		layers_[i] = new Dense(layers_sizes[i], layers_sizes[i + 1]);
+		layers_[i]->loadWeightsAndBiases(inFile);
+	}
+
+	inFile.close();
+}
+
 Matrix NeuralNetwork::calculateAnswer(const Matrix& input) {
 	layers_[0]->calculateLayerOutput(input, general_activation_func_);
 	for (int i = 1; i < layers_.size(); ++i) {
@@ -45,14 +81,14 @@ void NeuralNetwork::train(std::vector<Matrix*>& data_train, std::vector<Matrix*>
 						  std::vector<Matrix*>& data_test, std::vector<Matrix*>& answers_test, 
 						  const size_t& epochs, const size_t& butchSize) {
 
-	double LEARNING_RATE = 0.009;
+	double BEGIN = -1;
+	double END = 2.5;
+	double dx = (END - BEGIN) / (epochs - 1);
 
 	for (size_t j = 0; j < epochs; ++j) {
 		shuffle(data_train, answers_train);
-		
-		/*if (j == 10) {
-			LEARNING_RATE *= 10;
-		}*/
+
+		double LEARNING_RATE = std::exp(-(BEGIN + dx * j) * (BEGIN + dx * j)) / 40.0;
 
 		for (size_t i = 0; i < data_train.size() / butchSize; ++i) {
 			optimizerSGD(data_train, i * butchSize, (i + 1) * butchSize, answers_train, LEARNING_RATE);
@@ -63,17 +99,11 @@ void NeuralNetwork::train(std::vector<Matrix*>& data_train, std::vector<Matrix*>
 		}
 
 		double error_test = 0.0;
-		double error_train = 0.0;
-		/*for (size_t i = 0; i < data_test.size(); ++i) {
+		for (size_t i = 0; i < data_test.size(); ++i) {
 			error_test += cost_func_->calculateCost(*answers_test[i], calculateAnswer(*data_test[i]));
-		}*/
-		for (size_t i = 0; i < data_train.size(); ++i) {
-			error_train += cost_func_->calculateCost(*answers_train[i], calculateAnswer(*data_train[i]));
 		}
 		error_test /= data_test.size();
-		error_train /= data_train.size();
-		std::cout << "epoch " << j + 1 << ": error_test: " << error_test << ", error_train: " << error_train <<  std::endl;
-
+		std::cout << "epoch " << j + 1 << ": error_test: " << error_test   << std::endl;
 	}
 
 }
@@ -132,12 +162,6 @@ void NeuralNetwork::changeWeights(const Matrix& convergence_step) {
 	}
 }
 
-NeuralNetwork::~NeuralNetwork() {
-	for (int i = 0; i < layers_.size(); ++i) {
-		delete layers_[i];
-	}
-}
-
 void NeuralNetwork::save(const char* output_filename) const {
 	std::ofstream outFile(output_filename);
 	if (!outFile.is_open()) {
@@ -155,4 +179,31 @@ void NeuralNetwork::save(const char* output_filename) const {
 	}
 
 	outFile.close();
+}
+
+int NeuralNetwork::predict(const Matrix& input) {
+	Matrix answer = calculateAnswer(input);
+	int indexMax = 0;
+	for (size_t i = 0; i < answer.columns(); ++i) {
+		if (answer(0, indexMax) < answer(0, i)) {
+			indexMax = i;
+		}
+	}
+	return indexMax;
+}
+
+double NeuralNetwork::calculateAccuracy(const std::vector<Matrix*>& data_test, const std::vector<Matrix*> answers_test) {
+	double counter = 0;
+	for (size_t i = 0; i < data_test.size(); ++i) {
+		if ((*answers_test[i])(0, predict((*data_test[i]))) > 0.0) {
+			counter += 1;
+		}
+	}
+	return counter / data_test.size();
+}
+
+NeuralNetwork::~NeuralNetwork() {
+	for (int i = 0; i < layers_.size(); ++i) {
+		delete layers_[i];
+	}
 }

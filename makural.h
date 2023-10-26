@@ -2,10 +2,8 @@
 #define MODEL_MAKURAL
 
 #include <vector>
-#include <fstream>
 #include "layer.h"
 #include"costfunctions.h"
-
 
 class NeuralNetwork {
 	std::vector<Layer*> layers_;
@@ -25,11 +23,17 @@ public:
 	NeuralNetwork(const std::vector<int>& layers_sizes, ActivationFunction* general_activation_function, 
 				  ActivationFunction* output_activation_function, CostFunction* cost_func);
 
+	NeuralNetwork(const char* input_filename, ActivationFunction* general_activation_function,
+		ActivationFunction* output_activation_function, CostFunction* cost_func);
+
 	void train(std::vector<Matrix*>& data_train, std::vector<Matrix*>& answers_train,
 		std::vector<Matrix*>& data_test, std::vector<Matrix*>& answers_test, const size_t& epochs, const size_t& butchSize);
 
 	Matrix calculateAnswer(const Matrix& input);
+
 	void save(const char* output_filename) const;
+	int predict(const Matrix& input);
+	double calculateAccuracy(const std::vector<Matrix*>& data_test, const std::vector<Matrix*> answers_test);
 
 	~NeuralNetwork();
 };

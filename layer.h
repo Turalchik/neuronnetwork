@@ -3,7 +3,6 @@
 
 #include "matrixlab.h"
 #include "activationFunctions.h"
-#include <fstream>
 
 class Layer {
 protected:
@@ -28,7 +27,7 @@ public:
 	void addGradientToCurrentLayer(const Matrix& weights, const Matrix& biases);
 	void changeWeightsAndBiasesByGradient(const Matrix& convergence_step);
 	void initializeWeightsAndBiases();
-
+	void loadWeightsAndBiases(std::ifstream& inFile);
 	std::ofstream& save(std::ofstream& outFile) const;
 
 	const Matrix& getGradientsForWeights() const {

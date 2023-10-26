@@ -29,26 +29,6 @@ const Matrix& Input::calculateLayerOutput(const Matrix& input, const ActivationF
 	return before_activation_;
 }
 
-std::ofstream& Layer::save(std::ofstream& outFile) const {
-	for (int row = 0; row < weights_.rows(); ++row) {
-		for (int col = 0; col < weights_.columns(); ++col) {
-			outFile << weights_(row, col) << ' ';
-		}
-		outFile << std::endl;
-	}
-
-	outFile << std::endl;
-
-	for (int row = 0; row < biases_.rows(); ++row) {
-		for (int col = 0; col < biases_.columns(); ++col) {
-			outFile << biases_(row, col) << ' ';
-		}
-		outFile << std::endl;
-	}
-
-	return outFile;
-}
-
 const Matrix& Layer::getBeforeActivation() const {
 	return before_activation_;
 }
@@ -85,4 +65,40 @@ void Layer::addGradientToCurrentLayer(const Matrix& weights, const Matrix& biase
 void Layer::initializeWeightsAndBiases() {
 	weights_.FillMatrixByRandomNumbers(after_activation_.columns());
 	biases_.fillWithZeros();
+}
+
+void Layer::loadWeightsAndBiases(std::ifstream& inFile) {
+	double tempNumber = 0;
+	for (size_t i = 0; i < weights_.rows(); ++i) {
+		for (size_t j = 0; j < weights_.columns(); j++) {
+			inFile >> tempNumber;
+			weights_(i, j) = tempNumber;
+		}
+	}
+	for (size_t i = 0; i < biases_.rows(); ++i) {
+		for (size_t j = 0; j < biases_.columns(); j++) {
+			inFile >> tempNumber;
+			biases_(i, j) = tempNumber;
+		}
+	}
+}
+
+std::ofstream& Layer::save(std::ofstream& outFile) const {
+	for (int row = 0; row < weights_.rows(); ++row) {
+		for (int col = 0; col < weights_.columns(); ++col) {
+			outFile << weights_(row, col) << ' ';
+		}
+		outFile << std::endl;
+	}
+
+	outFile << std::endl;
+
+	for (int row = 0; row < biases_.rows(); ++row) {
+		for (int col = 0; col < biases_.columns(); ++col) {
+			outFile << biases_(row, col) << ' ';
+		}
+		outFile << std::endl;
+	}
+
+	return outFile;
 }

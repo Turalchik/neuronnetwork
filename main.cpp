@@ -4,7 +4,7 @@
 
 enum CONSTANTS
 {
-	TRAIN_DATA_VOLUME = 1'000,
+	TRAIN_DATA_VOLUME = 60'000,
 	TEST_DATA_VOLUME = 10'000,
 	INPUT_NEURON_AMOUNT = 784,
 	OUTPUT_NEURON_AMOUNT = 10,
@@ -27,7 +27,7 @@ void shuffle(std::vector<Matrix*>& data, std::vector<Matrix*>& answers) {
 
 int main() {
 	srand(time(NULL));
-	std::ifstream train("mnist_train_2.csv");
+	std::ifstream train("mnist_train.csv");
 	std::ifstream test("mnist_test.csv");
 
 	std::vector<Matrix*> data_train(TRAIN_DATA_VOLUME);
@@ -79,10 +79,12 @@ int main() {
 		while ((isdigit(test.peek()) == 0) && test.get() != EOF) {}
 	}
 
-	std::cout << "Dataset was loaded, start training" << std::endl << std::endl;
+	std::cout << "Dataset was loaded, started training" << std::endl << std::endl;
 
 	makural.train(data_train, answers_train, data_test, answers_test, EPOCHS_AMOUNT, BUTCH_SIZE);
-	makural.save("save_weights.txt");
+	makural.save("nndata.txt");
+
+	std::cout << makural.calculateAccuracy(data_test, answers_test) * 100 << "%" << std::endl;
 
 	train.close();
 	test.close();
