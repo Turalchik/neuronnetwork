@@ -137,3 +137,22 @@ NeuralNetwork::~NeuralNetwork() {
 		delete layers_[i];
 	}
 }
+
+void NeuralNetwork::save(const char* output_filename) const {
+	std::ofstream outFile(output_filename);
+	if (!outFile.is_open()) {
+		throw "Can not write to file";
+	}
+
+	outFile << layers_.size() + 1 << ' ' << (layers_[0]->getAfterActivation()).columns() << ' ';
+	for (int index = 0; index < layers_.size(); ++index) {
+		outFile << (layers_[index]->getBeforeActivation()).columns() << ' ';
+	}
+	outFile << std::endl;
+
+	for (int layer = 0; layer < layers_.size(); ++layer) {
+		layers_[layer]->save(outFile) << std::endl;
+	}
+
+	outFile.close();
+}

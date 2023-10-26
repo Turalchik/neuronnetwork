@@ -27,7 +27,7 @@ void shuffle(std::vector<Matrix*>& data, std::vector<Matrix*>& answers) {
 
 int main() {
 	srand(time(NULL));
-	std::ifstream train("mnist_train_3.csv");
+	std::ifstream train("mnist_train_2.csv");
 	std::ifstream test("mnist_test.csv");
 
 	std::vector<Matrix*> data_train(TRAIN_DATA_VOLUME);
@@ -62,7 +62,7 @@ int main() {
 
 	rowIndex = 0;
 
-	/*while (test.get() != '\n') {}
+	while (test.get() != '\n') {}
 
 	while (!test.eof()) {
 		answers_test[rowIndex] = new Matrix(1, OUTPUT_NEURON_AMOUNT);
@@ -77,12 +77,12 @@ int main() {
 		}
 		++rowIndex;
 		while ((isdigit(test.peek()) == 0) && test.get() != EOF) {}
-	}*/
+	}
 
 	std::cout << "Dataset was loaded, start training" << std::endl << std::endl;
 
 	makural.train(data_train, answers_train, data_test, answers_test, EPOCHS_AMOUNT, BUTCH_SIZE);
-
+	makural.save("save_weights.txt");
 
 	train.close();
 	test.close();

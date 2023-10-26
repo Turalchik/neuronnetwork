@@ -2,8 +2,10 @@
 #define MODEL_MAKURAL
 
 #include <vector>
+#include <fstream>
 #include "layer.h"
 #include"costfunctions.h"
+
 
 class NeuralNetwork {
 	std::vector<Layer*> layers_;
@@ -27,6 +29,7 @@ public:
 		std::vector<Matrix*>& data_test, std::vector<Matrix*>& answers_test, const size_t& epochs, const size_t& butchSize);
 
 	Matrix calculateAnswer(const Matrix& input);
+	void save(const char* output_filename) const;
 
 	~NeuralNetwork();
 };

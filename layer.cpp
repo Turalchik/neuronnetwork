@@ -29,6 +29,26 @@ const Matrix& Input::calculateLayerOutput(const Matrix& input, const ActivationF
 	return before_activation_;
 }
 
+std::ofstream& Layer::save(std::ofstream& outFile) const {
+	for (int row = 0; row < weights_.rows(); ++row) {
+		for (int col = 0; col < weights_.columns(); ++col) {
+			outFile << weights_(row, col) << ' ';
+		}
+		outFile << std::endl;
+	}
+
+	outFile << std::endl;
+
+	for (int row = 0; row < biases_.rows(); ++row) {
+		for (int col = 0; col < biases_.columns(); ++col) {
+			outFile << biases_(row, col) << ' ';
+		}
+		outFile << std::endl;
+	}
+
+	return outFile;
+}
+
 const Matrix& Layer::getBeforeActivation() const {
 	return before_activation_;
 }
