@@ -1,12 +1,12 @@
-#include"activationFunctions.h"
-#include<iostream>
+#include "activationFunctions.h"
+#include <iostream>
 
-Matrix Sigmoid::calculateFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd Sigmoid::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
-	Matrix newMatrix(WeightedSums.rows(), 1);
+	Eigen::MatrixXd  newMatrix(WeightedSums.rows(), 1);
 	for (size_t i = 0; i < WeightedSums.rows(); ++i) {
 		newMatrix(i, 0) = 1.0 / (1.0 + std::exp(-WeightedSums(i, 0)));
 	}
@@ -14,39 +14,38 @@ Matrix Sigmoid::calculateFunction(const Matrix& WeightedSums) const {
 	return newMatrix;
 }
 
-Matrix Sigmoid::calculateDerivativeFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd  Sigmoid::calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
-	Matrix ActivatedWeightedSums = calculateFunction(WeightedSums);
-	Matrix tempMatrix = ones(1, WeightedSums.columns());
+	Eigen::MatrixXd  ActivatedWeightedSums = calculateFunction(WeightedSums);
+	Eigen::MatrixXd  tempMatrix = Eigen::MatrixXd::Ones(1, WeightedSums.cols());
 	tempMatrix -= ActivatedWeightedSums;
-	tempMatrix.elementWiseMultiplication(ActivatedWeightedSums);
 
-	return tempMatrix;
+	return tempMatrix.cwiseProduct(ActivatedWeightedSums);;
 }
 
-Matrix ReLu::calculateFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd ReLu::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
-	Matrix newMatrix(1, WeightedSums.columns());
-	for (size_t i = 0; i < WeightedSums.columns(); ++i) {
+	Eigen::MatrixXd newMatrix(1, WeightedSums.cols());
+	for (size_t i = 0; i < WeightedSums.cols(); ++i) {
 		newMatrix(0, i) = (WeightedSums(0, i) > 0.0) ? WeightedSums(0, i) : 0;
 	}
 
 	return newMatrix;
 }
 
-Matrix ReLu::calculateDerivativeFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd ReLu::calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
-	Matrix newMatrix(1, WeightedSums.columns());
-	for (size_t i = 0; i < WeightedSums.columns(); ++i) {
+	Eigen::MatrixXd newMatrix(1, WeightedSums.cols());
+	for (size_t i = 0; i < WeightedSums.cols(); ++i) {
 		newMatrix(0, i) = (WeightedSums(0, i) > 0) ? 1 : 0;
 	}
 
@@ -54,12 +53,12 @@ Matrix ReLu::calculateDerivativeFunction(const Matrix& WeightedSums) const {
 
 }
 
-Matrix Tanh::calculateFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd Tanh::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
-	Matrix newMatrix(1, WeightedSums.columns());
+	Eigen::MatrixXd newMatrix(1, WeightedSums.cols());
 	for (size_t i = 0; i < WeightedSums.rows(); ++i) {
 		newMatrix(0, i) = (std::exp(WeightedSums(0, i)) - std::exp(-WeightedSums(0, i))) /
 			(std::exp(WeightedSums(0, i)) + std::exp(-WeightedSums(0, i)));
@@ -68,67 +67,65 @@ Matrix Tanh::calculateFunction(const Matrix& WeightedSums) const {
 	return newMatrix;
 }
 
-Matrix Tanh::calculateDerivativeFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd Tanh::calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
-	Matrix ActivatedWeightedSums = calculateFunction(WeightedSums);
-	Matrix tempMatrix = ones(1, WeightedSums.columns());
-	tempMatrix -= ActivatedWeightedSums.elementWiseMultiplication(ActivatedWeightedSums);
-
-	return tempMatrix;
+	Eigen::MatrixXd ActivatedWeightedSums = calculateFunction(WeightedSums);
+	Eigen::MatrixXd tempMatrix = Eigen::MatrixXd::Ones(1, WeightedSums.cols());
+	return tempMatrix -= ActivatedWeightedSums.cwiseProduct(ActivatedWeightedSums);
 }
 
-Matrix ELU::calculateFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd ELU::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
-	Matrix tempMatrix(1, WeightedSums.columns());
-	for (size_t i = 0; i < WeightedSums.columns(); ++i) {
+	Eigen::MatrixXd tempMatrix(1, WeightedSums.cols());
+	for (size_t i = 0; i < WeightedSums.cols(); ++i) {
 		tempMatrix(0, i) = (WeightedSums(0, i) > 0.0) ? WeightedSums(0, i) : alpha_ * (std::exp(WeightedSums(0, i) - 1.0));
 	}
 
 	return tempMatrix;
 }
 
-Matrix ELU::calculateDerivativeFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd ELU::calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
-	Matrix tempMatrix(1, WeightedSums.columns());
-	for (size_t i = 0; i < WeightedSums.columns(); ++i) {
+	Eigen::MatrixXd tempMatrix(1, WeightedSums.cols());
+	for (size_t i = 0; i < WeightedSums.cols(); ++i) {
 		tempMatrix(0, i) = (WeightedSums(0, i) > 0.0) ? 1.0 : alpha_ * (std::exp(WeightedSums(0, i)));
 	}
 
 	return tempMatrix;
 }
 
-Matrix Softmax::calculateFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd Softmax::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
 	double LowerSum = 0;
 	double ExponentedElement = 0;
-	Matrix tempMatrix(1, WeightedSums.columns());
+	Eigen::MatrixXd tempMatrix(1, WeightedSums.cols());
 
-	for (size_t i = 0; i < WeightedSums.columns(); ++i) {
+	for (size_t i = 0; i < WeightedSums.cols(); ++i) {
 		ExponentedElement = std::exp(WeightedSums(0, i));
 		tempMatrix(0, i) = ExponentedElement;
 		LowerSum += ExponentedElement;
 	}
 
-	for (size_t i = 0; i < WeightedSums.columns(); ++i) {
+	for (size_t i = 0; i < WeightedSums.cols(); ++i) {
 		tempMatrix(0, i) /= LowerSum;
 	}
 
 	return tempMatrix;
 }
 
-Matrix Softmax::calculateDerivativeFunction(const Matrix& WeightedSums) const {
+Eigen::MatrixXd Softmax::calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const {
 	// UNSOPPORTED
-	return 0;
+	return Eigen::MatrixXd();
 }

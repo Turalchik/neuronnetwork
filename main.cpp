@@ -10,23 +10,23 @@ enum CONSTANTS
 	EPOCHS_AMOUNT = 20,
 };
 
-void MNISTLoader(std::ifstream& data_file, std::vector<Matrix*>& data_vect, 
-				 std::vector<Matrix*>& answers_vect, const char* filename = "data") {
+void MNISTLoader(std::ifstream& data_file, std::vector<Eigen::MatrixXd*>& data_vect,
+				 std::vector<Eigen::MatrixXd*>& answers_vect, const char* filename = "data") {
 
 	std::cout << "Loading " << filename << " file..." << std::endl << std::endl;
 
-	Matrix* tempMatrix;
+	Eigen::MatrixXd* tempMatrix;
 	int get = 0;
 	while (data_file.get() != '\n') {}
 
 	while (!data_file.eof()) {
-		tempMatrix = new Matrix(1, OUTPUT_NEURON_AMOUNT);
-		tempMatrix->fillWithZeros();
+		tempMatrix = new Eigen::MatrixXd(1, OUTPUT_NEURON_AMOUNT);
+		tempMatrix->setZero();
 		answers_vect.push_back(tempMatrix);
 		(*answers_vect[answers_vect.size() - 1])(0, data_file.get() - '0') = 1.0;
 		data_file.ignore();
 
-		data_vect.push_back(new Matrix(1, INPUT_NEURON_AMOUNT));
+		data_vect.push_back(new Eigen::MatrixXd(1, INPUT_NEURON_AMOUNT));
 		for (int i = 0; i < INPUT_NEURON_AMOUNT; ++i) {
 			data_file >> get;
 			(*data_vect[data_vect.size() - 1])(0, i) = static_cast<double>(get) / 255.0;
@@ -46,10 +46,10 @@ int main() {
 	std::ifstream train_file(train_data_path);
 	std::ifstream test_file(test_data_path);
 
-	std::vector<Matrix*> data_train;
-	std::vector<Matrix*> answers_train;
-	std::vector<Matrix*> data_test;
-	std::vector<Matrix*> answers_test;
+	std::vector<Eigen::MatrixXd*> data_train;
+	std::vector<Eigen::MatrixXd*> answers_train;
+	std::vector<Eigen::MatrixXd*> data_test;
+	std::vector<Eigen::MatrixXd*> answers_test;
 
 	MNISTLoader(train_file, data_train, answers_train, train_data_path);
 	MNISTLoader(test_file, data_test, answers_test, test_data_path);

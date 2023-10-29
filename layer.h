@@ -1,31 +1,31 @@
 #ifndef LAYER_MAKURAL
 #define LAYER_MAKURAL
 
-#include "matrixlab.h"
 #include "activationFunctions.h"
+#include <fstream>
 
 class Layer {
 protected:
-	Matrix before_activation_;
-	Matrix weights_;
-	Matrix after_activation_;
-	Matrix biases_;
+	Eigen::MatrixXd before_activation_;
+	Eigen::MatrixXd weights_;
+	Eigen::MatrixXd after_activation_;
+	Eigen::MatrixXd biases_;
 
-	Matrix gradient_nodes_weights_;
-	Matrix gradient_nodes_biases_;
+	Eigen::MatrixXd gradient_nodes_weights_;
+	Eigen::MatrixXd gradient_nodes_biases_;
 public:
 	Layer(int input_size, int output_size);
-	virtual const Matrix& calculateLayerOutput(const Matrix& input_data, const ActivationFunction* activationFunc) = 0;
-	const Matrix& getBeforeActivation() const;
-	const Matrix& getAfterActivation() const;
-	const Matrix& getWeights() const;
-	const Matrix& getBiases() const;
-	const Matrix& getGradientsForWeights() const;
-	const Matrix& getGradientsForBiases() const;
-	void averageGradient(const Matrix& butch_size);
-	void putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases);
-	void addGradientToCurrentLayer(const Matrix& weights, const Matrix& biases);
-	void changeWeightsAndBiasesByGradient(const Matrix& convergence_step);
+	virtual const Eigen::MatrixXd& calculateLayerOutput(const Eigen::MatrixXd& input_data, const ActivationFunction* activationFunc) = 0;
+	const Eigen::MatrixXd& getBeforeActivation() const;
+	const Eigen::MatrixXd& getAfterActivation() const;
+	const Eigen::MatrixXd& getWeights() const;
+	const Eigen::MatrixXd& getBiases() const;
+	const Eigen::MatrixXd& getGradientsForWeights() const;
+	const Eigen::MatrixXd& getGradientsForBiases() const;
+	void averageGradient(const double& butch_size);
+	void putGradientIntoCurrentLayer(Eigen::MatrixXd&& weights, Eigen::MatrixXd&& biases);
+	void addGradientToCurrentLayer(const Eigen::MatrixXd& weights, const Eigen::MatrixXd& biases);
+	void changeWeightsAndBiasesByGradient(const Eigen::MatrixXd& convergence_step);
 	void initializeWeightsAndBiases();
 	void loadWeightsAndBiases(std::ifstream& inFile);
 	std::ofstream& save(std::ofstream& outFile) const;
@@ -34,13 +34,16 @@ public:
 class Input : public Layer {
 public:
 	Input(int input_size, int output_size) : Layer(input_size, output_size){}
-	const Matrix& calculateLayerOutput(const Matrix& input, const ActivationFunction* activationFunc);
+	const Eigen::MatrixXd& calculateLayerOutput(const Eigen::MatrixXd& input, const ActivationFunction* activationFunc);
 };
 
 class Dense : public Layer {
 public:
 	Dense(int input_size, int output_size) : Layer(input_size, output_size){}
-	const Matrix& calculateLayerOutput(const Matrix& input, const ActivationFunction* activationFunc);
+	const Eigen::MatrixXd& calculateLayerOutput(const Eigen::MatrixXd& input, const ActivationFunction* activationFunc);
 };
+
+void fillMatrixByRandomNumbers(Eigen::MatrixXd& weights, const double& after_activation_size);
+void fillWithZeros(Eigen::MatrixXd& biases);
 
 #endif
