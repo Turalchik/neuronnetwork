@@ -60,8 +60,6 @@ Matrix operator* (const Matrix& X, const Matrix& Y);
 Matrix operator/ (const Matrix& X, const Matrix& Y);
 Matrix transpose(const Matrix& X);
 Matrix invMatrix(const Matrix& X);
-Matrix zeros(const size_t& rows, const size_t& columns);
-Matrix eye(const size_t& n);
 Matrix ones(const size_t& rows, const size_t& columns);
 Matrix elementWiseMultiplication(const Matrix& X, const Matrix& Y);
 Matrix elementWiseDivision(const Matrix& X, const Matrix& Y);

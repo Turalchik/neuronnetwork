@@ -4,6 +4,7 @@
 #include <vector>
 #include "layer.h"
 #include"costfunctions.h"
+#include<string>
 
 class NeuralNetwork {
 	std::vector<Layer*> layers_;
@@ -31,9 +32,10 @@ public:
 
 	Matrix calculateAnswer(const Matrix& input);
 
-	void save(const char* output_filename) const;
+	void save(const std::string& output_filename) const;
 	int predict(const Matrix& input);
 	double calculateAccuracy(const std::vector<Matrix*>& data_test, const std::vector<Matrix*> answers_test);
+	double calculateAverageLoss(const std::vector<Matrix*>& data_test, const std::vector<Matrix*> answers_test);
 
 	~NeuralNetwork();
 };

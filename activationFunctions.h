@@ -12,8 +12,6 @@ public:
 	virtual Matrix calculateDerivativeFunction(const Matrix& WeightedSums) const = 0;
 };
 
-
-
 class Sigmoid : public ActivationFunction {
 public:
 	Matrix calculateFunction(const Matrix& WeightedSums) const override;

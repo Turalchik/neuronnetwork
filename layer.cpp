@@ -41,6 +41,17 @@ const Matrix& Layer::getWeights() const {
 	return weights_;
 }
 
+const Matrix& Layer::getBiases() const {
+	return biases_;
+}
+
+const Matrix& Layer::getGradientsForWeights() const {
+	return gradient_nodes_weights_;
+}
+const Matrix& Layer::getGradientsForBiases() const {
+	return gradient_nodes_biases_;
+}
+
 void Layer::averageGradient(const Matrix& butch_size) {
 	gradient_nodes_weights_ /= butch_size;
 	gradient_nodes_biases_ /= butch_size;

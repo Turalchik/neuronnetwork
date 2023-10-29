@@ -19,9 +19,9 @@ public:
 	const Matrix& getBeforeActivation() const;
 	const Matrix& getAfterActivation() const;
 	const Matrix& getWeights() const;
-	const Matrix& getBiases() const {
-		return biases_;
-	}
+	const Matrix& getBiases() const;
+	const Matrix& getGradientsForWeights() const;
+	const Matrix& getGradientsForBiases() const;
 	void averageGradient(const Matrix& butch_size);
 	void putGradientIntoCurrentLayer(Matrix&& weights, Matrix&& biases);
 	void addGradientToCurrentLayer(const Matrix& weights, const Matrix& biases);
@@ -29,13 +29,6 @@ public:
 	void initializeWeightsAndBiases();
 	void loadWeightsAndBiases(std::ifstream& inFile);
 	std::ofstream& save(std::ofstream& outFile) const;
-
-	const Matrix& getGradientsForWeights() const {
-		return gradient_nodes_weights_;
-	}
-	const Matrix& getGradientsForBiases() const {
-		return gradient_nodes_biases_;
-	}
 };
 
 class Input : public Layer {

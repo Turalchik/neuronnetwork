@@ -5,7 +5,7 @@
 Matrix::Matrix(const size_t& rows, const size_t& columns) : rows_(rows), columns_(columns) {
 	matrix_ = new double* [rows_];
 	for (size_t i = 0; i < rows_; ++i) {
-		matrix_[i] = new double[columns_] {};
+		matrix_[i] = new double[columns_];
 	}
 }
 
@@ -31,12 +31,15 @@ Matrix Matrix::multiplicationByTransposeMatrix(const Matrix& other) const {
 	}
 
 	Matrix result(rows_, other.rows_);
+	double tempNumber;
 
 	for (int row = 0; row < result.rows_; ++row) {
 		for (int col = 0; col < result.columns_; ++col) {
+			tempNumber = 0.0;
 			for (int gen = 0; gen < columns_; ++gen) {
-				result.matrix_[row][col] += matrix_[row][gen] * other.matrix_[col][gen];
+				tempNumber += matrix_[row][gen] * other.matrix_[col][gen];
 			}
+			result.matrix_[row][col] = tempNumber;
 		}
 	}
 
@@ -49,12 +52,15 @@ Matrix Matrix::multiplicationTransposeByMatrix(const Matrix& other) const {
 	}
 
 	Matrix result(columns_, other.columns_);
+	double tempNumber;
 
 	for (int row = 0; row < result.rows_; ++row) {
 		for (int col = 0; col < result.columns_; ++col) {
+			tempNumber = 0.0;
 			for (int gen = 0; gen < rows_; ++gen) {
-				result.matrix_[row][col] += matrix_[gen][row] * other.matrix_[gen][col];
+				tempNumber += matrix_[gen][row] * other.matrix_[gen][col];
 			}
+			result.matrix_[row][col] = tempNumber;
 		}
 	}
 

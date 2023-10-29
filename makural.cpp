@@ -80,32 +80,28 @@ Matrix NeuralNetwork::calculateAnswer(const Matrix& input) {
 void NeuralNetwork::train(std::vector<Matrix*>& data_train, std::vector<Matrix*>& answers_train, 
 						  std::vector<Matrix*>& data_test, std::vector<Matrix*>& answers_test, 
 						  const size_t& epochs, const size_t& butchSize) {
-
-	double BEGIN = -1;
+	srand(time(NULL));
+	double LEARNING_RATE;
+	double BEGIN = -1.0;
 	double END = 2.5;
-	double dx = (END - BEGIN) / (epochs - 1);
+	double dx = epochs > 1 ? (END - BEGIN) / (epochs - 1) : 0.0;
 
 	for (size_t j = 0; j < epochs; ++j) {
+
 		shuffle(data_train, answers_train);
 
-		double LEARNING_RATE = std::exp(-(BEGIN + dx * j) * (BEGIN + dx * j)) / 40.0;
+		LEARNING_RATE = std::exp(-(BEGIN + dx * j) * (BEGIN + dx * j)) / 20.0;
+		
 
 		for (size_t i = 0; i < data_train.size() / butchSize; ++i) {
 			optimizerSGD(data_train, i * butchSize, (i + 1) * butchSize, answers_train, LEARNING_RATE);
 		}
 		if (data_train.size() % butchSize != 0) {
-			optimizerSGD(data_train, data_train.size() - data_train.size() % butchSize, 
-				         data_train.size(), answers_train, LEARNING_RATE);
+			optimizerSGD(data_train, data_train.size() - data_train.size() % butchSize, data_train.size(), answers_train, LEARNING_RATE);
 		}
 
-		double error_test = 0.0;
-		for (size_t i = 0; i < data_test.size(); ++i) {
-			error_test += cost_func_->calculateCost(*answers_test[i], calculateAnswer(*data_test[i]));
-		}
-		error_test /= data_test.size();
-		std::cout << "epoch " << j + 1 << ": error_test: " << error_test   << std::endl;
+		std::cout << "epoch=" << j + 1 << ", loss=" << calculateAverageLoss(data_test, answers_test) << std::endl;
 	}
-
 }
 
 void NeuralNetwork::optimizerSGD(const std::vector<Matrix*>& data_train, size_t batchBegins, size_t batchEnds, 
@@ -162,7 +158,7 @@ void NeuralNetwork::changeWeights(const Matrix& convergence_step) {
 	}
 }
 
-void NeuralNetwork::save(const char* output_filename) const {
+void NeuralNetwork::save(const std::string& output_filename) const {
 	std::ofstream outFile(output_filename);
 	if (!outFile.is_open()) {
 		throw "Can not write to file";
@@ -199,7 +195,15 @@ double NeuralNetwork::calculateAccuracy(const std::vector<Matrix*>& data_test, c
 			counter += 1;
 		}
 	}
-	return counter / data_test.size();
+	return (counter / data_test.size()) * 100.0;
+}
+
+double NeuralNetwork::calculateAverageLoss(const std::vector<Matrix*>& data_test, const std::vector<Matrix*> answers_test) {
+	double error_test = 0.0;
+	for (size_t i = 0; i < data_test.size(); ++i) {
+		error_test += cost_func_->calculateCost(*answers_test[i], calculateAnswer(*data_test[i]));
+	}
+	return error_test / data_test.size();
 }
 
 NeuralNetwork::~NeuralNetwork() {
