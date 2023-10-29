@@ -1,7 +1,8 @@
 #include "makural.h"
 #include<iostream>
 
-void NeuralNetwork::shuffle(std::vector<Matrix*>& data, std::vector<Matrix*>& answers) {
+
+void NeuralNetwork::shuffle(std::vector<Eigen::MatrixXd*>& data, std::vector<Eigen::MatrixXd*>& answers) {
 	int random = 0;
 	for (int i = 0; i < data.size(); ++i) {
 		random = rand() % data.size();
@@ -69,7 +70,7 @@ NeuralNetwork::NeuralNetwork(const char* input_filename,
 	inFile.close();
 }
 
-Matrix NeuralNetwork::calculateAnswer(const Matrix& input) {
+Eigen::MatrixXd NeuralNetwork::calculateAnswer(const Eigen::MatrixXd& input) {
 	layers_[0]->calculateLayerOutput(input, general_activation_func_);
 	for (int i = 1; i < layers_.size(); ++i) {
 		layers_[i]->calculateLayerOutput(layers_[i - 1]->getBeforeActivation(), general_activation_func_);
@@ -77,8 +78,8 @@ Matrix NeuralNetwork::calculateAnswer(const Matrix& input) {
 	return output_activation_func_->calculateFunction(layers_[layers_.size() - 1]->getBeforeActivation());
 }
 
-void NeuralNetwork::train(std::vector<Matrix*>& data_train, std::vector<Matrix*>& answers_train, 
-						  std::vector<Matrix*>& data_test, std::vector<Matrix*>& answers_test, 
+void NeuralNetwork::train(std::vector<Eigen::MatrixXd*>& data_train, std::vector<Eigen::MatrixXd*>& answers_train,
+						  std::vector<Eigen::MatrixXd*>& data_test, std::vector<Eigen::MatrixXd*>& answers_test,
 						  const size_t& epochs, const size_t& butchSize) {
 	srand(time(NULL));
 	double LEARNING_RATE;
@@ -104,8 +105,8 @@ void NeuralNetwork::train(std::vector<Matrix*>& data_train, std::vector<Matrix*>
 	}
 }
 
-void NeuralNetwork::optimizerSGD(const std::vector<Matrix*>& data_train, size_t batchBegins, size_t batchEnds, 
-	                             const std::vector<Matrix*>& answers, const double& learning_rate) {
+void NeuralNetwork::optimizerSGD(const std::vector<Eigen::MatrixXd*>& data_train, size_t batchBegins, size_t batchEnds,
+	                             const std::vector<Eigen::MatrixXd*>& answers, const double& learning_rate) {
 
 	applySuitBackpropagationAlgorithm(calculateAnswer(*data_train[batchBegins]), *answers[batchBegins]);
 	for (size_t i = batchBegins + 1; i < batchEnds; ++i) {
@@ -117,42 +118,38 @@ void NeuralNetwork::optimizerSGD(const std::vector<Matrix*>& data_train, size_t 
 	changeWeights(learning_rate);
 }
 
-void NeuralNetwork::applySuitBackpropagationAlgorithm(const Matrix& ourOutputs, const Matrix& actualOutputs) {
+void NeuralNetwork::applySuitBackpropagationAlgorithm(const Eigen::MatrixXd& ourOutputs, const Eigen::MatrixXd& actualOutputs) {
 	//de_dt is calculated for softmax + crossentropy  /generalize
-	Matrix de_dt = ourOutputs - actualOutputs;
-	Matrix de_dh = 0;
+	Eigen::MatrixXd de_dt = ourOutputs - actualOutputs;
+	Eigen::MatrixXd de_dh;
 	for (size_t i = layers_.size() - 1; i > 0; --i) {
 
-		de_dh = layers_[i]->getWeights().multiplicationByTransposeMatrix(de_dt);
+		de_dh = layers_[i]->getWeights() * de_dt.transpose();
 
-		layers_[i]->putGradientIntoCurrentLayer(layers_[i]->getAfterActivation().multiplicationTransposeByMatrix(de_dt), 
-																									  std::move(de_dt));
+		layers_[i]->putGradientIntoCurrentLayer(layers_[i]->getAfterActivation().transpose() * de_dt, std::move(de_dt));
 
-		de_dt = de_dh.elementWiseMultiplicationTransposeByMatrix(general_activation_func_->
-			calculateDerivativeFunction(layers_[i - 1]->getBeforeActivation()));
+		de_dt = de_dh.transpose().cwiseProduct(general_activation_func_->calculateDerivativeFunction(layers_[i - 1]->getBeforeActivation()));
 	}
-	layers_[0]->putGradientIntoCurrentLayer(layers_[0]->getAfterActivation().multiplicationTransposeByMatrix(de_dt), 
-																								  std::move(de_dt));
+	layers_[0]->putGradientIntoCurrentLayer(layers_[0]->getAfterActivation().transpose() * de_dt, std::move(de_dt));
 }
 
-void NeuralNetwork::applyGeneralBackpropagationAlgorithm(const Matrix& ourOutputs, const Matrix& actualOutputs) {
+void NeuralNetwork::applyGeneralBackpropagationAlgorithm(const Eigen::MatrixXd& ourOutputs, const Eigen::MatrixXd& actualOutputs) {
 	//de_dt is calculated for softmax + crossentropy  /generalize
-	Matrix de_dt = ourOutputs - actualOutputs;
-	Matrix de_dh = 0;
+	Eigen::MatrixXd de_dt = ourOutputs - actualOutputs;
+	Eigen::MatrixXd de_dh;
 	for (size_t i = layers_.size() - 1; i > 0; --i) {
 
-		de_dh = layers_[i]->getWeights().multiplicationByTransposeMatrix(de_dt);
+		de_dh = layers_[i]->getWeights() * de_dt.transpose();
 
-		layers_[i]->addGradientToCurrentLayer(layers_[i]->getAfterActivation().multiplicationTransposeByMatrix(de_dt), de_dt);
+		layers_[i]->addGradientToCurrentLayer(layers_[i]->getAfterActivation().transpose() * de_dt, de_dt);
 
-		de_dt = de_dh.elementWiseMultiplicationTransposeByMatrix(general_activation_func_->
-			calculateDerivativeFunction(layers_[i - 1]->getBeforeActivation()));
+		de_dt = de_dh.cwiseProduct(general_activation_func_->calculateDerivativeFunction(layers_[i - 1]->getBeforeActivation()));
 	}
-	layers_[0]->addGradientToCurrentLayer(layers_[0]->getAfterActivation().multiplicationTransposeByMatrix(de_dt), de_dt);
+	layers_[0]->addGradientToCurrentLayer(layers_[0]->getAfterActivation().transpose() * de_dt, de_dt);
 }
 
 
-void NeuralNetwork::changeWeights(const Matrix& convergence_step) {
+void NeuralNetwork::changeWeights(const double& convergence_step) {
 	for (int i = 0; i < layers_.size(); ++i) {
 		layers_[i]->changeWeightsAndBiasesByGradient(convergence_step);
 	}
@@ -164,9 +161,9 @@ void NeuralNetwork::save(const std::string& output_filename) const {
 		throw "Can not write to file";
 	}
 
-	outFile << layers_.size() + 1 << ' ' << (layers_[0]->getAfterActivation()).columns() << ' ';
+	outFile << layers_.size() + 1 << ' ' << (layers_[0]->getAfterActivation()).cols() << ' ';
 	for (int index = 0; index < layers_.size(); ++index) {
-		outFile << (layers_[index]->getBeforeActivation()).columns() << ' ';
+		outFile << (layers_[index]->getBeforeActivation()).cols() << ' ';
 	}
 	outFile << std::endl;
 
@@ -177,10 +174,10 @@ void NeuralNetwork::save(const std::string& output_filename) const {
 	outFile.close();
 }
 
-int NeuralNetwork::predict(const Matrix& input) {
-	Matrix answer = calculateAnswer(input);
+int NeuralNetwork::predict(const Eigen::MatrixXd& input) {
+	Eigen::MatrixXd answer = calculateAnswer(input);
 	int indexMax = 0;
-	for (size_t i = 0; i < answer.columns(); ++i) {
+	for (size_t i = 0; i < answer.cols(); ++i) {
 		if (answer(0, indexMax) < answer(0, i)) {
 			indexMax = i;
 		}
@@ -188,7 +185,7 @@ int NeuralNetwork::predict(const Matrix& input) {
 	return indexMax;
 }
 
-double NeuralNetwork::calculateAccuracy(const std::vector<Matrix*>& data_test, const std::vector<Matrix*> answers_test) {
+double NeuralNetwork::calculateAccuracy(const std::vector<Eigen::MatrixXd*>& data_test, const std::vector<Eigen::MatrixXd*> answers_test) {
 	double counter = 0;
 	for (size_t i = 0; i < data_test.size(); ++i) {
 		if ((*answers_test[i])(0, predict((*data_test[i]))) > 0.0) {
@@ -198,7 +195,7 @@ double NeuralNetwork::calculateAccuracy(const std::vector<Matrix*>& data_test, c
 	return (counter / data_test.size()) * 100.0;
 }
 
-double NeuralNetwork::calculateAverageLoss(const std::vector<Matrix*>& data_test, const std::vector<Matrix*> answers_test) {
+double NeuralNetwork::calculateAverageLoss(const std::vector<Eigen::MatrixXd*>& data_test, const std::vector<Eigen::MatrixXd*> answers_test) {
 	double error_test = 0.0;
 	for (size_t i = 0; i < data_test.size(); ++i) {
 		error_test += cost_func_->calculateCost(*answers_test[i], calculateAnswer(*data_test[i]));
