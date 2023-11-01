@@ -3,47 +3,46 @@
 
 #include <Eigen/Dense>
 
-class ActivationFunction {
-protected:
-	double alpha_;
+class HiddenActivationFunction {
 public:
-	ActivationFunction(double alpha = 0) : alpha_(alpha) {}
 	virtual Eigen::MatrixXd calculateFunction(const Eigen::MatrixXd& WeightedSums) const = 0;
 	virtual Eigen::MatrixXd calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const = 0;
+	virtual const char* getStr() const = 0;
+	static HiddenActivationFunction* constructObject(const char* function);
 };
 
-class Sigmoid : public ActivationFunction {
+class Sigmoid : public HiddenActivationFunction {
 public:
 	Eigen::MatrixXd calculateFunction(const Eigen::MatrixXd& WeightedSums) const override;
 	Eigen::MatrixXd calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const override;
+	const char* getStr() const override;
 };
 
-class ReLu : public ActivationFunction {
+class ReLu : public HiddenActivationFunction {
 public:
 	Eigen::MatrixXd calculateFunction(const Eigen::MatrixXd& WeightedSums) const override;
 	Eigen::MatrixXd calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const override;
+	const char* getStr() const override;
 };
 
-
-class Tanh : public ActivationFunction {
+class Tanh : public HiddenActivationFunction {
 public:
 	Eigen::MatrixXd  calculateFunction(const Eigen::MatrixXd& WeightedSums) const override;
 	Eigen::MatrixXd  calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const override;
+	const char* getStr() const override;
 };
 
-class ELU : public ActivationFunction {
+class OutputActivationFunction {
 public:
-	ELU(double alpha) : ActivationFunction(alpha) {}
-	Eigen::MatrixXd  calculateFunction(const Eigen::MatrixXd& WeightedSums) const override;
-	Eigen::MatrixXd  calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const override;
+	virtual Eigen::MatrixXd calculateFunction(const Eigen::MatrixXd& WeightedSums) const = 0;
+	virtual const char* getStr() const = 0;
+	static OutputActivationFunction* constructObject(const char* function);
 };
 
-
-class Softmax : public ActivationFunction {
+class Softmax : public OutputActivationFunction {
 public:
-	Eigen::MatrixXd  calculateFunction(const Eigen::MatrixXd& WeightedSums) const override;
-	Eigen::MatrixXd  calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const override;
+	Eigen::MatrixXd calculateFunction(const Eigen::MatrixXd& WeightedSums) const override;
+	const char* getStr() const override;
 };
-
 
 #endif

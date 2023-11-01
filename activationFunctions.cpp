@@ -1,20 +1,33 @@
 #include "activationFunctions.h"
 #include <iostream>
 
+HiddenActivationFunction* HiddenActivationFunction::constructObject(const char* function) {
+	if (!_strcmpi(function, "sigmoid")) {
+		return new Sigmoid;
+	}
+	if (!_strcmpi(function, "relu")) {
+		return new ReLu;
+	}
+	if (!_strcmpi(function, "tanh")) {
+		return new Tanh;
+	}
+	throw "There's no hidden layer activation function like this.";
+}
+
 Eigen::MatrixXd Sigmoid::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
 
-	Eigen::MatrixXd  newMatrix(WeightedSums.rows(), 1);
-	for (size_t i = 0; i < WeightedSums.rows(); ++i) {
-		newMatrix(i, 0) = 1.0 / (1.0 + std::exp(-WeightedSums(i, 0)));
+	Eigen::MatrixXd  newMatrix(1, WeightedSums.cols());
+	for (size_t i = 0; i < WeightedSums.cols(); ++i) {
+		newMatrix(0, i) = 1.0 / (1.0 + std::exp(-WeightedSums(0, i)));
 	}
 
 	return newMatrix;
 }
 
-Eigen::MatrixXd  Sigmoid::calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const {
+Eigen::MatrixXd Sigmoid::calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
 	}
@@ -24,6 +37,10 @@ Eigen::MatrixXd  Sigmoid::calculateDerivativeFunction(const Eigen::MatrixXd& Wei
 	tempMatrix -= ActivatedWeightedSums;
 
 	return tempMatrix.cwiseProduct(ActivatedWeightedSums);;
+}
+
+const char* Sigmoid::getStr() const {
+	return "sigmoid";
 }
 
 Eigen::MatrixXd ReLu::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
@@ -53,6 +70,10 @@ Eigen::MatrixXd ReLu::calculateDerivativeFunction(const Eigen::MatrixXd& Weighte
 
 }
 
+const char* ReLu::getStr() const {
+	return "relu";
+}
+
 Eigen::MatrixXd Tanh::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
 	if (WeightedSums.rows() != 1) {
 		throw "Wrong WeightedSums vector size.";
@@ -77,30 +98,15 @@ Eigen::MatrixXd Tanh::calculateDerivativeFunction(const Eigen::MatrixXd& Weighte
 	return tempMatrix -= ActivatedWeightedSums.cwiseProduct(ActivatedWeightedSums);
 }
 
-Eigen::MatrixXd ELU::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
-	if (WeightedSums.rows() != 1) {
-		throw "Wrong WeightedSums vector size.";
-	}
-
-	Eigen::MatrixXd tempMatrix(1, WeightedSums.cols());
-	for (size_t i = 0; i < WeightedSums.cols(); ++i) {
-		tempMatrix(0, i) = (WeightedSums(0, i) > 0.0) ? WeightedSums(0, i) : alpha_ * (std::exp(WeightedSums(0, i) - 1.0));
-	}
-
-	return tempMatrix;
+const char* Tanh::getStr() const {
+	return "tanh";
 }
 
-Eigen::MatrixXd ELU::calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const {
-	if (WeightedSums.rows() != 1) {
-		throw "Wrong WeightedSums vector size.";
+OutputActivationFunction* OutputActivationFunction::constructObject(const char* function) {
+	if (!_strcmpi(function, "softmax")) {
+		return new Softmax;
 	}
-
-	Eigen::MatrixXd tempMatrix(1, WeightedSums.cols());
-	for (size_t i = 0; i < WeightedSums.cols(); ++i) {
-		tempMatrix(0, i) = (WeightedSums(0, i) > 0.0) ? 1.0 : alpha_ * (std::exp(WeightedSums(0, i)));
-	}
-
-	return tempMatrix;
+	throw "There's no output layer activation function like this.";
 }
 
 Eigen::MatrixXd Softmax::calculateFunction(const Eigen::MatrixXd& WeightedSums) const {
@@ -125,7 +131,6 @@ Eigen::MatrixXd Softmax::calculateFunction(const Eigen::MatrixXd& WeightedSums) 
 	return tempMatrix;
 }
 
-Eigen::MatrixXd Softmax::calculateDerivativeFunction(const Eigen::MatrixXd& WeightedSums) const {
-	// UNSOPPORTED
-	return Eigen::MatrixXd();
+const char* Softmax::getStr() const {
+	return "softmax";
 }

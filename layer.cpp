@@ -9,7 +9,7 @@ Layer::Layer(int input_size, int output_size) :
 	gradient_nodes_weights_(input_size, output_size),
 	gradient_nodes_biases_(1, output_size) {}
 
-const Eigen::MatrixXd& Dense::calculateLayerOutput(const Eigen::MatrixXd& input, const ActivationFunction* activationFunc) {
+const Eigen::MatrixXd& Dense::calculateLayerOutput(const Eigen::MatrixXd& input, const HiddenActivationFunction* activationFunc) {
 	if (input.rows() != 1 || input.cols() != after_activation_.cols()) {
 		throw "Error in calculateOutput";
 	}
@@ -20,7 +20,7 @@ const Eigen::MatrixXd& Dense::calculateLayerOutput(const Eigen::MatrixXd& input,
 	return before_activation_;
 }
 
-const Eigen::MatrixXd& Input::calculateLayerOutput(const Eigen::MatrixXd& input, const ActivationFunction* activationFunc) {
+const Eigen::MatrixXd& Input::calculateLayerOutput(const Eigen::MatrixXd& input, const HiddenActivationFunction* activationFunc) {
 	if (input.rows() != 1 || input.cols() != after_activation_.cols()) {
 		throw "Error in calculateOutput";
 	}
@@ -64,7 +64,7 @@ void Layer::putGradientIntoCurrentLayer(Eigen::MatrixXd&& weights, Eigen::Matrix
 	gradient_nodes_biases_ = biases;
 }
 
-void Layer::changeWeightsAndBiasesByGradient(const Eigen::MatrixXd& convergence_step) {
+void Layer::changeWeightsAndBiasesByGradient(const double& convergence_step) {
 	weights_ -= convergence_step * gradient_nodes_weights_;
 	biases_ -= convergence_step * gradient_nodes_biases_;
 }
@@ -76,7 +76,7 @@ void Layer::addGradientToCurrentLayer(const Eigen::MatrixXd& weights, const Eige
 
 void Layer::initializeWeightsAndBiases() {
 	fillMatrixByRandomNumbers(weights_, after_activation_.cols());
-	fillWithZeros(biases_);
+	biases_.setZero();
 }
 
 void Layer::loadWeightsAndBiases(std::ifstream& inFile) {
@@ -123,14 +123,6 @@ void fillMatrixByRandomNumbers(Eigen::MatrixXd& weights, const double& after_act
 	for (size_t i = 0; i < weights.rows(); ++i) {
 		for (size_t j = 0; j < weights.cols(); ++j) {
 			weights(i, j) = dis(gen);
-		}
-	}
-}
-
-void fillWithZeros(Eigen::MatrixXd& biases) {
-	for (size_t i = 0; i < biases.rows(); ++i) {
-		for (size_t j = 0; j < biases.cols(); ++j) {
-			biases(i, j) = 0.0;
 		}
 	}
 }

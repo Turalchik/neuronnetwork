@@ -13,9 +13,10 @@ protected:
 
 	Eigen::MatrixXd gradient_nodes_weights_;
 	Eigen::MatrixXd gradient_nodes_biases_;
+
 public:
 	Layer(int input_size, int output_size);
-	virtual const Eigen::MatrixXd& calculateLayerOutput(const Eigen::MatrixXd& input_data, const ActivationFunction* activationFunc) = 0;
+	virtual const Eigen::MatrixXd& calculateLayerOutput(const Eigen::MatrixXd& input_data, const HiddenActivationFunction* activationFunc) = 0;
 	const Eigen::MatrixXd& getBeforeActivation() const;
 	const Eigen::MatrixXd& getAfterActivation() const;
 	const Eigen::MatrixXd& getWeights() const;
@@ -25,7 +26,7 @@ public:
 	void averageGradient(const double& butch_size);
 	void putGradientIntoCurrentLayer(Eigen::MatrixXd&& weights, Eigen::MatrixXd&& biases);
 	void addGradientToCurrentLayer(const Eigen::MatrixXd& weights, const Eigen::MatrixXd& biases);
-	void changeWeightsAndBiasesByGradient(const Eigen::MatrixXd& convergence_step);
+	void changeWeightsAndBiasesByGradient(const double& convergence_step);
 	void initializeWeightsAndBiases();
 	void loadWeightsAndBiases(std::ifstream& inFile);
 	std::ofstream& save(std::ofstream& outFile) const;
@@ -33,17 +34,16 @@ public:
 
 class Input : public Layer {
 public:
-	Input(int input_size, int output_size) : Layer(input_size, output_size){}
-	const Eigen::MatrixXd& calculateLayerOutput(const Eigen::MatrixXd& input, const ActivationFunction* activationFunc);
+	Input(int input_size, int output_size) : Layer(input_size, output_size) {}
+	const Eigen::MatrixXd& calculateLayerOutput(const Eigen::MatrixXd& input, const HiddenActivationFunction* activationFunc) override;
 };
 
 class Dense : public Layer {
 public:
-	Dense(int input_size, int output_size) : Layer(input_size, output_size){}
-	const Eigen::MatrixXd& calculateLayerOutput(const Eigen::MatrixXd& input, const ActivationFunction* activationFunc);
+	Dense(int input_size, int output_size) : Layer(input_size, output_size) {}
+	const Eigen::MatrixXd& calculateLayerOutput(const Eigen::MatrixXd& input, const HiddenActivationFunction* activationFunc) override;
 };
 
 void fillMatrixByRandomNumbers(Eigen::MatrixXd& weights, const double& after_activation_size);
-void fillWithZeros(Eigen::MatrixXd& biases);
 
 #endif
