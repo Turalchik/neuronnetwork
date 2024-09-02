@@ -1,7 +1,7 @@
 #include "makural.h"
 #include<iostream>
 
-void NeuralNetwork::shuffle(std::vector<Eigen::MatrixXd*>& data, std::vector<Eigen::MatrixXd*>& answers, const size_t& from, const size_t& to) {
+void NeuralNetwork::shuffle(dataVec& data, dataVec& answers, const size_t& from, const size_t& to) {
 	int random = 0;
 	for (int i = from; i < to; ++i) {
 		random = rand() % to;
@@ -83,14 +83,17 @@ Eigen::MatrixXd NeuralNetwork::answerVec(const Eigen::MatrixXd& input) {
 	return output_activation_func_->calculateFunction(layers_[layers_.size() - 1]->getBeforeActivation());
 }
 
-void NeuralNetwork::train(std::vector<Eigen::MatrixXd*>& data_train, std::vector<Eigen::MatrixXd*>& answers_train, const double& validation_split,
-	const char* optimizer_name, const size_t& epochs, const size_t& butchSize) {
+void NeuralNetwork::train(dataVec& data_train, dataVec& answers_train, const double& validation_split,
+						  const char* optimizer_name, const size_t& epochs, const size_t& butchSize) {
+
 	if (validation_split > 1 || validation_split < 0) {
 		throw "Valid proportion belongs in between [0, 1].";
 	}
 
 	ptrFun optimizer = getOptimizer(optimizer_name);
 	size_t real_train_size = data_train.size() * (1 - validation_split);
+
+	shuffle(data_train, answers_train, 0, data_train.size());
 
 	srand(time(NULL));
 	double LEARNING_RATE;
@@ -107,7 +110,7 @@ void NeuralNetwork::train(std::vector<Eigen::MatrixXd*>& data_train, std::vector
 
 		shuffle(data_train, answers_train, 0, real_train_size);
 
-		LEARNING_RATE = std::exp(-(BEGIN + dx * j) * (BEGIN + dx * j)) / 20.0;
+		LEARNING_RATE = std::exp(-(BEGIN + dx * j) * (BEGIN + dx * j)) / 15.0;
 		
 		for (size_t i = 0; i <  real_train_size / butchSize; ++i) {
 			(this->*optimizer)(data_train, i * butchSize, (i + 1) * butchSize, answers_train, LEARNING_RATE);
@@ -121,13 +124,11 @@ void NeuralNetwork::train(std::vector<Eigen::MatrixXd*>& data_train, std::vector
 		std::cout << "epoch=" << j + 1 << ", validation_loss=" <<
 			averageLoss(data_train, answers_train, real_train_size, data_train.size()) << ", time=" <<
 			static_cast<double>(timeFinish - timeStart) / CLOCKS_PER_SEC << " sec" << std::endl;
-
-
 	}
 }
 
-void NeuralNetwork::optimizerSGD(const std::vector<Eigen::MatrixXd*>& data_train, size_t batchBegins, size_t batchEnds,
-	                             const std::vector<Eigen::MatrixXd*>& answers, const double& learning_rate) {
+void NeuralNetwork::optimizerSGD(const dataVec& data_train, size_t batchBegins, size_t batchEnds,
+	                             const dataVec& answers, const double& learning_rate) {
 
 	applySuitBackpropagationAlgorithm(answerVec(*data_train[batchBegins]), *answers[batchBegins]);
 	for (size_t i = batchBegins + 1; i < batchEnds; ++i) {
@@ -139,8 +140,25 @@ void NeuralNetwork::optimizerSGD(const std::vector<Eigen::MatrixXd*>& data_train
 	changeWeights(learning_rate);
 }
 
+void NeuralNetwork::Adam(const dataVec& data_train, size_t batchBegins, size_t batchEnds,
+	const dataVec& answers, const double& learning_rate = 1e-3) {
+
+	double p1 = 0.9;
+	double p2 = 0.999;
+	double delta = 1e-8;
+	
+
+	applySuitBackpropagationAlgorithm(answerVec(*data_train[batchBegins]), *answers[batchBegins]);
+	for (size_t i = batchBegins + 1; i < batchEnds; ++i) {
+		applyGeneralBackpropagationAlgorithm(answerVec(*data_train[i]), *answers[i]);
+	}
+	for (size_t i = 0; i < layers_.size(); ++i) {
+		layers_[i]->averageGradient(batchEnds - batchBegins);
+	}
+
+}
+
 void NeuralNetwork::applySuitBackpropagationAlgorithm(const Eigen::MatrixXd& ourOutputs, const Eigen::MatrixXd& actualOutputs) {
-	//de_dt is calculated for softmax + crossentropy  /generalize
 	Eigen::MatrixXd de_dt = ourOutputs - actualOutputs;
 	Eigen::MatrixXd de_dh;
 	for (size_t i = layers_.size() - 1; i > 0; --i) {
@@ -155,7 +173,6 @@ void NeuralNetwork::applySuitBackpropagationAlgorithm(const Eigen::MatrixXd& our
 }
 
 void NeuralNetwork::applyGeneralBackpropagationAlgorithm(const Eigen::MatrixXd& ourOutputs, const Eigen::MatrixXd& actualOutputs) {
-	//de_dt is calculated for softmax + crossentropy  /generalize
 	Eigen::MatrixXd de_dt = ourOutputs - actualOutputs;
 	Eigen::MatrixXd de_dh;
 	for (size_t i = layers_.size() - 1; i > 0; --i) {
@@ -208,7 +225,7 @@ int NeuralNetwork::predict(const Eigen::MatrixXd& input) {
 	return indexMax;
 }
 
-double NeuralNetwork::accuracy(const std::vector<Eigen::MatrixXd*>& data_test, const std::vector<Eigen::MatrixXd*> answers_test) {
+double NeuralNetwork::accuracy(const dataVec& data_test, const dataVec& answers_test) {
 	double counter = 0;
 	for (size_t i = 0; i < data_test.size(); ++i) {
 		if ((*answers_test[i])(0, predict((*data_test[i]))) > 0.0) {
@@ -218,7 +235,7 @@ double NeuralNetwork::accuracy(const std::vector<Eigen::MatrixXd*>& data_test, c
 	return (counter / data_test.size()) * 100.0;
 }
 
-double NeuralNetwork::averageLoss(const std::vector<Eigen::MatrixXd*>& data_test, const std::vector<Eigen::MatrixXd*> answers_test, 
+double NeuralNetwork::averageLoss(const dataVec& data_test, const dataVec& answers_test, 
 										   const size_t& from, const size_t& to) {
 	double error = 0.0;
 	for (size_t i = from; i < to; ++i) {
@@ -237,5 +254,8 @@ NeuralNetwork::~NeuralNetwork() {
 	for (int i = 0; i < layers_.size(); ++i) {
 		delete layers_[i];
 	}
+	delete general_activation_func_;
+	delete output_activation_func_;
+	delete cost_func_;
 }
 
